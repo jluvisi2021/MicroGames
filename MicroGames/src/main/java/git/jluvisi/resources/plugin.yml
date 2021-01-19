@@ -1,0 +1,7 @@
+main: git.jluvisi.MicroGames
+name: MicroGames
+version: ${project.version}
+author: Interryne
+api-version: 1.16
+website: github.com/jluvisi2021/MicroGames
+description: A Minigames plugin for Spigot 1.16.5.
