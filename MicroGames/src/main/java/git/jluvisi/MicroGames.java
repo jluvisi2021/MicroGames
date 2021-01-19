@@ -1,6 +1,12 @@
 package git.jluvisi;
 
+import java.io.IOException;
+
 import org.bukkit.plugin.java.JavaPlugin;
+
+import git.jluvisi.cmds.MicrogamesCommand;
+import git.jluvisi.util.ConfigManager;
+import net.md_5.bungee.api.ChatColor;
 
 /**
  *
@@ -13,8 +19,11 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class MicroGames extends JavaPlugin {
 
+    final float majorConfigVersion = 1.0F;
+
     @Override
     public void onEnable() {
+        loadConfig();
         registerCommands();
         registerEvents();
 
@@ -28,10 +37,47 @@ public class MicroGames extends JavaPlugin {
     }
 
     /**
+     * Checks to ensure that the configuration is updated to the latest version.
+     *
+     * @param configManager
+     */
+    private void validateConfig(ConfigManager configManager) {
+        try {
+            if (Float.parseFloat(configManager.getString("major-config-version")) != majorConfigVersion) {
+                getLogger().severe(ChatColor.RED
+                        + "ERROR: CONFIGURATION FILE IS OUTDATED OR WRONG. PLEASE VIEW THE WEBSITE FOR MORE INFORMATION ON HOW TO REGENERATE THE CONFIG FILE.");
+                getServer().getPluginManager().disablePlugin(this);
+            }
+        } catch (NumberFormatException e) {
+            getLogger().severe(ChatColor.RED
+                    + "ERROR: CONFIGURATION FILE IS OUTDATED OR WRONG. PLEASE VIEW THE WEBSITE FOR MORE INFORMATION ON HOW TO REGENERATE THE CONFIG FILE.");
+            getServer().getPluginManager().disablePlugin(this);
+        }
+
+    }
+
+    /**
+     * Loads the config.yml and data.yml files.
+     */
+    private void loadConfig() {
+        ConfigManager configYAML = new ConfigManager(this, "config.yml");
+        ConfigManager dataYAML = new ConfigManager(this, "data.yml");
+        try {
+            configYAML.saveConfig();
+            configYAML.reloadConfig();
+            dataYAML.saveConfig();
+            dataYAML.reloadConfig();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        validateConfig(configYAML);
+    }
+
+    /**
      * A method that sets up the commands that this plugin has.
      */
     private void registerCommands() {
-
+        getCommand("microgames").setExecutor(new MicrogamesCommand(this));
     }
 
     /**

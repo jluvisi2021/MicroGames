@@ -5,3 +5,8 @@ author: Interryne
 api-version: 1.16
 website: github.com/jluvisi2021/MicroGames
 description: A Minigames plugin for Spigot 1.16.5.
+
+commands:
+  microgames:
+    description: The base command for the plugin. (Gives version)
+    aliases: [mg]

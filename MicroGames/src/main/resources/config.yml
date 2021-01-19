@@ -1,0 +1,26 @@
+#  __  __ ___ ____ ____   ___   ____    _    __  __ _____ ____
+# |  \/  |_ _/ ___|  _ \ / _ \ / ___|  / \  |  \/  | ____/ ___|
+# | |\/| || | |   | |_) | | | | |  _  / _ \ | |\/| |  _| \___ \
+# | |  | || | |___|  _ <| |_| | |_| |/ ___ \| |  | | |___ ___) |
+# |_|__|_|___\____|_|_\_\\___/_\____/_/   \_\_|  |_|_____|____/
+#  / ___/ _ \| \ | |  ___|_ _/ ___|
+# | |  | | | |  \| | |_   | | |  _
+# | |__| |_| | |\  |  _|  | | |_| |
+#  \____\___/|_| \_|_|   |___\____|
+# Version: 1.0-SNAPSHOT (Unfinished)
+# Author: Interryne/jluvisi2021
+# Github: https://github.com/jluvisi2021/MicroGames
+# If you need to reload your configuration or have other problems then go to the github "HELP" section in README.md! :D
+
+# DO NOT EDIT #
+major-config-version: "1.0"
+###############
+
+# Messages in the plugin.
+messages:
+  must-be-player: "&cYou must be a player to execute this command!"
+  no-permission: "&cYou do not have permission to execute this command!"
+
+# Permissions
+permissions:
+  reload-config: "microgames.reload"
