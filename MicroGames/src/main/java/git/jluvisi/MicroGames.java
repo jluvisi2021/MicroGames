@@ -35,7 +35,7 @@ public class MicroGames extends JavaPlugin {
     final float majorConfigVersion = 1.0F;
     public static ArrayList<GameInstance> gameList = new ArrayList<GameInstance>();
     private ConfigManager configYAML;
-    private ConfigManager dataYAML;
+    private ConfigManager signsYAML;
 
     @Override
     public void onEnable() {
@@ -54,20 +54,20 @@ public class MicroGames extends JavaPlugin {
     }
 
     private void setupGameInstances() {
-        ConfigurationSection minigameSection = dataYAML.getConfig().getConfigurationSection("minigame-signs.gameid");
+        ConfigurationSection minigameSection = signsYAML.getConfig().getConfigurationSection("minigame-signs.gameid");
         if (minigameSection == null) {
             return;
         }
         for (String key : minigameSection.getKeys(false)) {
             Location instanceLocation = new Location(
-                    getServer().getWorld(dataYAML.getString("minigame-signs.gameid." + key + ".location.world")),
-                    Double.parseDouble(dataYAML.getString("minigame-signs.gameid." + key + ".location.x")),
-                    Double.parseDouble(dataYAML.getString("minigame-signs.gameid." + key + ".location.y")),
-                    Double.parseDouble(dataYAML.getString("minigame-signs.gameid." + key + ".location.z")));
-            int minPlayers = Integer.parseInt(dataYAML.getString("minigame-signs.gameid." + key + ".minimum-players"));
-            int maxPlayers = Integer.parseInt(dataYAML.getString("minigame-signs.gameid." + key + ".maximum-players"));
-            int startingTime = Integer.parseInt(dataYAML.getString("minigame-signs.gameid." + key + ".starting-time"));
-            int winningScore = Integer.parseInt(dataYAML.getString("minigame-signs.gameid." + key + ".winning-score"));
+                    getServer().getWorld(signsYAML.getString("minigame-signs.gameid." + key + ".location.world")),
+                    Double.parseDouble(signsYAML.getString("minigame-signs.gameid." + key + ".location.x")),
+                    Double.parseDouble(signsYAML.getString("minigame-signs.gameid." + key + ".location.y")),
+                    Double.parseDouble(signsYAML.getString("minigame-signs.gameid." + key + ".location.z")));
+            int minPlayers = Integer.parseInt(signsYAML.getString("minigame-signs.gameid." + key + ".minimum-players"));
+            int maxPlayers = Integer.parseInt(signsYAML.getString("minigame-signs.gameid." + key + ".maximum-players"));
+            int startingTime = Integer.parseInt(signsYAML.getString("minigame-signs.gameid." + key + ".starting-time"));
+            int winningScore = Integer.parseInt(signsYAML.getString("minigame-signs.gameid." + key + ".winning-score"));
             GameInstance gameInstance = new GameInstance(UUID.fromString(key), instanceLocation, minPlayers, maxPlayers,
                     startingTime, winningScore);
             gameList.add(gameInstance);
@@ -95,16 +95,16 @@ public class MicroGames extends JavaPlugin {
     }
 
     /**
-     * Loads the config.yml and data.yml files.
+     * Loads the config.yml and signs.yml files.
      */
     private void loadConfig() {
         configYAML = new ConfigManager(this, "config.yml");
-        dataYAML = new ConfigManager(this, "data.yml");
+        signsYAML = new ConfigManager(this, "signs.yml");
         try {
             configYAML.saveConfig();
             configYAML.reloadConfig();
-            dataYAML.saveConfig();
-            dataYAML.reloadConfig();
+            signsYAML.saveConfig();
+            signsYAML.reloadConfig();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -136,9 +136,9 @@ public class MicroGames extends JavaPlugin {
         getLogger().info("https://github.com/jluvisi2021/MicroGames");
         getLogger().info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
 
-        // Delete the entire dataYAML file to replace it with everything in the list.
+        // Delete the entire signsYAML file to replace it with everything in the list.
         try {
-            dataYAML.setValue("minigame-signs.gameid", null);
+            signsYAML.setValue("minigame-signs.gameid", null);
         } catch (IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -149,32 +149,32 @@ public class MicroGames extends JavaPlugin {
                 gameInstance.generateGameUUID();
             }
             // write all the game instances to config.
-            if (dataYAML.getConfig()
+            if (signsYAML.getConfig()
                     .get("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString()) == null) {
                 try {
-                    dataYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString(), true);
-                    dataYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString()
+                    signsYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString(), true);
+                    signsYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString()
                             + ".location.world", gameInstance.getSignLocation().getWorld().getName());
-                    dataYAML.setValue(
+                    signsYAML.setValue(
                             "minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString() + ".location.x",
                             gameInstance.getSignLocation().getX());
-                    dataYAML.setValue(
+                    signsYAML.setValue(
                             "minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString() + ".location.y",
                             gameInstance.getSignLocation().getY());
-                    dataYAML.setValue(
+                    signsYAML.setValue(
                             "minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString() + ".location.z",
                             gameInstance.getSignLocation().getZ());
-                    dataYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString()
+                    signsYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString()
                             + ".minimum-players", gameInstance.getMinPlayers());
-                    dataYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString()
+                    signsYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString()
                             + ".maximum-players", gameInstance.getMaxPlayers());
-                    dataYAML.setValue(
+                    signsYAML.setValue(
                             "minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString() + ".starting-time",
                             gameInstance.getStartingTime());
-                    dataYAML.setValue(
+                    signsYAML.setValue(
                             "minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString() + ".winning-score",
                             gameInstance.getWinningScore());
-                    dataYAML.saveConfig();
+                    signsYAML.saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

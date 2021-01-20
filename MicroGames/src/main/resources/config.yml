@@ -29,10 +29,11 @@ permissions:
   destroy-game-sign: "microgames.destroysign"
 
 # Enable game signs. (Games can still be run with "/microgames start <param>")
-# You can edit the individual lines and colors of a sign when it is placed except for the first line.
+# You can edit the individual lines and colors of a sign when it is placed except for the first line (color can be adjusted).
 # Placeholders. %curr_players%, %max_players%, %winning_score%
 game-signs:
   enabled: true
+  line1-color: "&0&l"
   line2: "%curr_players%/%max_players%"
   line3: "Winning Score: &9&l%winning_score%"
   line4: "&lCLICK TO JOIN"

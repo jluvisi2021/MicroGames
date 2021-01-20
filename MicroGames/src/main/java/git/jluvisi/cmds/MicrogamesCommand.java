@@ -22,12 +22,12 @@ public class MicrogamesCommand implements CommandExecutor {
         // Initalize Globals
         private final MicroGames plugin;
         private final ConfigManager configYAML;
-        private final ConfigManager dataYAML;
+        private final ConfigManager signsYAML;
 
         public MicrogamesCommand(MicroGames plugin) {
                 this.plugin = plugin;
                 this.configYAML = new ConfigManager(plugin, "config.yml");
-                this.dataYAML = new ConfigManager(plugin, "data.yml");
+                this.signsYAML = new ConfigManager(plugin, "signs.yml");
         }
 
         @Override
@@ -50,7 +50,7 @@ public class MicrogamesCommand implements CommandExecutor {
                                                                 .color(ChatColor.GREEN).create());
 
                                                 configYAML.reloadConfig();
-                                                dataYAML.reloadConfig();
+                                                signsYAML.reloadConfig();
                                                 return true;
                                         } else if (args[0].equalsIgnoreCase("setup")) {
                                                 if (!p.hasPermission(Permissions.SETUP_SIGN.toString())) {

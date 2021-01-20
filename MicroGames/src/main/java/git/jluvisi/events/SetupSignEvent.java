@@ -24,7 +24,7 @@ public class SetupSignEvent implements Listener {
     private final MicroGames plugin;
     private final ConfigManager configYAML;
 
-    public SetupSignEvent(MicroGames plugin) {
+    public SetupSignEvent(final MicroGames plugin) {
         this.plugin = plugin;
         this.configYAML = new ConfigManager(plugin, "config.yml");
     }

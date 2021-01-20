@@ -18,28 +18,26 @@ import net.md_5.bungee.api.chat.TextComponent;
  */
 public class DestroyGameEvent implements Listener {
 
-    private ConfigManager configYAML;
+    private final ConfigManager configYAML;
 
-    public DestroyGameEvent(MicroGames plugin) {
+    public DestroyGameEvent(final MicroGames plugin) {
         this.configYAML = new ConfigManager(plugin, "config.yml");
     }
 
     @EventHandler
     public void event(BlockBreakEvent e) {
-        if (!configYAML.getBoolean("game-signs.enabled")) {
-            return;
-        }
         Player p = e.getPlayer();
         // if the block broken is a sign
         if (e.getBlock().getType() == Material.OAK_SIGN) {
             Sign sign = (Sign) e.getBlock().getState();
             // If the first line is [MicroGames]
-            if (sign.getLine(0).equals(ChatColor.DARK_PURPLE.toString() + ChatColor.BOLD.toString() + "[MicroGames]")) {
+            if (sign.getLine(0).equals(ChatColor.translateAlternateColorCodes('&',
+                    configYAML.getString("game-signs.line1-color") + "[MicroGames]"))) {
                 // If the player is allowed to destroy minigame signs.
                 if (!p.hasPermission(Permissions.DESTROY_SIGN.toString())) {
                     TextComponent message = new TextComponent("You do not have permission to destroy game signs!");
                     message.setColor(ChatColor.RED);
-                    e.getPlayer().spigot().sendMessage(message);
+                    p.spigot().sendMessage(message);
                     e.setCancelled(true);
                     return;
                 }
@@ -48,8 +46,11 @@ public class DestroyGameEvent implements Listener {
                 final int size = MicroGames.gameList.size();
                 for (int i = 0; i < size; i++) {
                     if (MicroGames.gameList.get(i).getSignLocation().equals(sign.getLocation())) {
-                        p.spigot().sendMessage(new TextComponent("Destroyed Game Sign."));
+                        TextComponent message = new TextComponent("Destroyed Game Sign.");
+                        message.setColor(ChatColor.RED);
+                        p.spigot().sendMessage(message);
                         MicroGames.gameList.remove(i);
+                        return;
                     }
                 }
 

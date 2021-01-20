@@ -19,10 +19,10 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
  */
 public class SetupGameEvent implements Listener {
 
-    private MicroGames plugin;
-    private ConfigManager configYAML;
+    private final MicroGames plugin;
+    private final ConfigManager configYAML;
 
-    public SetupGameEvent(MicroGames plugin) {
+    public SetupGameEvent(final MicroGames plugin) {
         this.plugin = plugin;
         this.configYAML = new ConfigManager(plugin, "config.yml");
     }

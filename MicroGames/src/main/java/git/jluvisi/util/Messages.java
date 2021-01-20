@@ -15,7 +15,8 @@ import net.md_5.bungee.api.chat.TextComponent;
 public enum Messages {
 
     MUST_BE_PLAYER("messages.must-be-player"), NO_PERMISSION("messages.no-permission"),
-    GAME_SIGNS_DISABLED("messages.game-signs-disabled");
+    GAME_SIGNS_DISABLED("messages.game-signs-disabled"), GAME_SIGNS_LINE1("game-signs.line1-color"),
+    GAME_SIGNS_LINE2("game-signs.line2"), GAME_SIGNS_LINE3("game-signs.line3"), GAME_SIGNS_LINE4("game-signs.line4");
 
     /**
      * We use a static singleton reference here instead of dependency injection
@@ -51,7 +52,7 @@ public enum Messages {
 
     /**
      * Get the string as a chatcolor string.
-     * 
+     *
      * @return
      */
     public String getLegacyMessage() {

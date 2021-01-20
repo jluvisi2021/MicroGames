@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.event.block.SignChangeEvent;
 
 import git.jluvisi.util.ConfigManager;
+import git.jluvisi.util.Messages;
 import net.md_5.bungee.api.ChatColor;
 
 public class GameInstance {
@@ -95,10 +96,11 @@ public class GameInstance {
      * @param instance
      */
     public static void setupSignData(SignChangeEvent e, GameInstance instance, ConfigManager configYAML) {
-        e.setLine(0, ChatColor.DARK_PURPLE.toString() + ChatColor.BOLD + "[MicroGames]");
-        e.setLine(1, parseSignFromConfig(configYAML.getString("game-signs.line2"), instance));
-        e.setLine(2, parseSignFromConfig(configYAML.getString("game-signs.line3"), instance));
-        e.setLine(3, parseSignFromConfig(configYAML.getString("game-signs.line4"), instance));
+        e.setLine(0, ChatColor.translateAlternateColorCodes('&',
+                Messages.GAME_SIGNS_LINE1.getLegacyMessage() + "[MicroGames]"));
+        e.setLine(1, parseSignFromConfig(Messages.GAME_SIGNS_LINE2.getLegacyMessage(), instance));
+        e.setLine(2, parseSignFromConfig(Messages.GAME_SIGNS_LINE3.getLegacyMessage(), instance));
+        e.setLine(3, parseSignFromConfig(Messages.GAME_SIGNS_LINE4.getLegacyMessage(), instance));
     }
 
     /**

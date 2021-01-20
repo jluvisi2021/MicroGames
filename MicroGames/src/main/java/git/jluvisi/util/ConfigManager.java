@@ -12,7 +12,7 @@ import git.jluvisi.MicroGames;
 
 /**
  * This class is used to manage different configuration files within the plugin.
- * More Specifically: 'config.yml' and 'data.yml'.
+ * More Specifically: 'config.yml' and 'signs.yml'.
  */
 public class ConfigManager {
 
