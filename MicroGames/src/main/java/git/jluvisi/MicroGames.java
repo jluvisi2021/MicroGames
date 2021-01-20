@@ -1,10 +1,18 @@
 package git.jluvisi;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.UUID;
 
+import org.bukkit.Location;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import git.jluvisi.cmds.MicrogamesCommand;
+import git.jluvisi.events.DestroyGameEvent;
+import git.jluvisi.events.SetupGameEvent;
+import git.jluvisi.events.SetupSignEvent;
+import git.jluvisi.minigames.GameInstance;
 import git.jluvisi.util.ConfigManager;
 import net.md_5.bungee.api.ChatColor;
 
@@ -19,7 +27,15 @@ import net.md_5.bungee.api.ChatColor;
  */
 public class MicroGames extends JavaPlugin {
 
+    /**
+     * Keep track of the major configuration file version in case someone downloads
+     * a newer version of the plugin with an outdated config that cannot be read
+     * from correctly.
+     */
     final float majorConfigVersion = 1.0F;
+    public static ArrayList<GameInstance> gameList = new ArrayList<GameInstance>();
+    private ConfigManager configYAML;
+    private ConfigManager dataYAML;
 
     @Override
     public void onEnable() {
@@ -33,7 +49,29 @@ public class MicroGames extends JavaPlugin {
         getLogger().info("https://github.com/jluvisi2021/MicroGames");
         getLogger().info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
 
+        setupGameInstances();
         super.onEnable();
+    }
+
+    private void setupGameInstances() {
+        ConfigurationSection minigameSection = dataYAML.getConfig().getConfigurationSection("minigame-signs.gameid");
+        if (minigameSection == null) {
+            return;
+        }
+        for (String key : minigameSection.getKeys(false)) {
+            Location instanceLocation = new Location(
+                    getServer().getWorld(dataYAML.getString("minigame-signs.gameid." + key + ".location.world")),
+                    Double.parseDouble(dataYAML.getString("minigame-signs.gameid." + key + ".location.x")),
+                    Double.parseDouble(dataYAML.getString("minigame-signs.gameid." + key + ".location.y")),
+                    Double.parseDouble(dataYAML.getString("minigame-signs.gameid." + key + ".location.z")));
+            int minPlayers = Integer.parseInt(dataYAML.getString("minigame-signs.gameid." + key + ".minimum-players"));
+            int maxPlayers = Integer.parseInt(dataYAML.getString("minigame-signs.gameid." + key + ".maximum-players"));
+            int startingTime = Integer.parseInt(dataYAML.getString("minigame-signs.gameid." + key + ".starting-time"));
+            int winningScore = Integer.parseInt(dataYAML.getString("minigame-signs.gameid." + key + ".winning-score"));
+            GameInstance gameInstance = new GameInstance(UUID.fromString(key), instanceLocation, minPlayers, maxPlayers,
+                    startingTime, winningScore);
+            gameList.add(gameInstance);
+        }
     }
 
     /**
@@ -60,8 +98,8 @@ public class MicroGames extends JavaPlugin {
      * Loads the config.yml and data.yml files.
      */
     private void loadConfig() {
-        ConfigManager configYAML = new ConfigManager(this, "config.yml");
-        ConfigManager dataYAML = new ConfigManager(this, "data.yml");
+        configYAML = new ConfigManager(this, "config.yml");
+        dataYAML = new ConfigManager(this, "data.yml");
         try {
             configYAML.saveConfig();
             configYAML.reloadConfig();
@@ -84,7 +122,9 @@ public class MicroGames extends JavaPlugin {
      * A method that sets up the events for each event this plugin has.
      */
     private void registerEvents() {
-
+        getServer().getPluginManager().registerEvents(new SetupSignEvent(this), this);
+        getServer().getPluginManager().registerEvents(new SetupGameEvent(this), this);
+        getServer().getPluginManager().registerEvents(new DestroyGameEvent(this), this);
     }
 
     @Override
@@ -95,6 +135,52 @@ public class MicroGames extends JavaPlugin {
         getLogger().info("Plugin Version: " + this.getDescription().getVersion());
         getLogger().info("https://github.com/jluvisi2021/MicroGames");
         getLogger().info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+
+        // Delete the entire dataYAML file to replace it with everything in the list.
+        try {
+            dataYAML.setValue("minigame-signs.gameid", null);
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        // Check to see if any new game instances have been made since last restart.
+        for (GameInstance gameInstance : MicroGames.gameList) {
+            if (gameInstance.getGameInstanceUUID() == null) {
+                gameInstance.generateGameUUID();
+            }
+            // write all the game instances to config.
+            if (dataYAML.getConfig()
+                    .get("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString()) == null) {
+                try {
+                    dataYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString(), true);
+                    dataYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString()
+                            + ".location.world", gameInstance.getSignLocation().getWorld().getName());
+                    dataYAML.setValue(
+                            "minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString() + ".location.x",
+                            gameInstance.getSignLocation().getX());
+                    dataYAML.setValue(
+                            "minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString() + ".location.y",
+                            gameInstance.getSignLocation().getY());
+                    dataYAML.setValue(
+                            "minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString() + ".location.z",
+                            gameInstance.getSignLocation().getZ());
+                    dataYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString()
+                            + ".minimum-players", gameInstance.getMinPlayers());
+                    dataYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString()
+                            + ".maximum-players", gameInstance.getMaxPlayers());
+                    dataYAML.setValue(
+                            "minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString() + ".starting-time",
+                            gameInstance.getStartingTime());
+                    dataYAML.setValue(
+                            "minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString() + ".winning-score",
+                            gameInstance.getWinningScore());
+                    dataYAML.saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
 
         super.onDisable();
     }

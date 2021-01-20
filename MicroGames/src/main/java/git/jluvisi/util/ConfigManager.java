@@ -15,10 +15,11 @@ import git.jluvisi.MicroGames;
  * More Specifically: 'config.yml' and 'data.yml'.
  */
 public class ConfigManager {
-    private MicroGames plugin;
-    private File config;
+
+    private final MicroGames plugin;
+    private final File config;
     private YamlConfiguration yamlConfig;
-    private String fileName;
+    private final String fileName;
 
     /**
      * Setup the constructor for one individual configuration file.
@@ -45,7 +46,8 @@ public class ConfigManager {
      * @throws IOException
      */
     public void saveConfig() throws IOException {
-        this.getConfig().save(fileName);
+        this.yamlConfig.save(config);
+
     }
 
     /**
@@ -99,7 +101,7 @@ public class ConfigManager {
      */
     public void setValue(String node, Object value) throws IOException {
         this.yamlConfig.set(node, value);
-        this.saveConfig();
+        this.yamlConfig.save(config);
         this.reloadConfig();
     }
 }

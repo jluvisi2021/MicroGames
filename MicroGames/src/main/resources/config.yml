@@ -20,7 +20,19 @@ major-config-version: "1.0"
 messages:
   must-be-player: "&cYou must be a player to execute this command!"
   no-permission: "&cYou do not have permission to execute this command!"
+  game-signs-disabled: "&cGame signs are currently disabled!"
 
 # Permissions
 permissions:
   reload-config: "microgames.reload"
+  setup-game-sign: "microgames.setupsign"
+  destroy-game-sign: "microgames.destroysign"
+
+# Enable game signs. (Games can still be run with "/microgames start <param>")
+# You can edit the individual lines and colors of a sign when it is placed except for the first line.
+# Placeholders. %curr_players%, %max_players%, %winning_score%
+game-signs:
+  enabled: true
+  line2: "%curr_players%/%max_players%"
+  line3: "Winning Score: &9&l%winning_score%"
+  line4: "&lCLICK TO JOIN"
