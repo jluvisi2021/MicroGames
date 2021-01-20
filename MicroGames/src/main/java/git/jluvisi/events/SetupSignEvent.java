@@ -31,6 +31,7 @@ public class SetupSignEvent implements Listener {
 
     @EventHandler
     public void event(AsyncPlayerChatEvent e) {
+        configYAML.reloadConfig();
         if (!configYAML.getBoolean("game-signs.enabled")) {
             return;
         }

@@ -28,7 +28,7 @@ public class DestroyGameEvent implements Listener {
     public void event(BlockBreakEvent e) {
         Player p = e.getPlayer();
         // if the block broken is a sign
-        if (e.getBlock().getType() == Material.OAK_SIGN) {
+        if (e.getBlock().getType() == Material.OAK_SIGN || e.getBlock().getType() == Material.OAK_WALL_SIGN) {
             Sign sign = (Sign) e.getBlock().getState();
             // If the first line is [MicroGames]
             if (sign.getLine(0).equals(ChatColor.translateAlternateColorCodes('&',
@@ -43,14 +43,13 @@ public class DestroyGameEvent implements Listener {
                 }
 
                 // Then we remove the sign from the arraylist.
-                final int size = MicroGames.gameList.size();
+                int size = MicroGames.gameList.size();
                 for (int i = 0; i < size; i++) {
                     if (MicroGames.gameList.get(i).getSignLocation().equals(sign.getLocation())) {
                         TextComponent message = new TextComponent("Destroyed Game Sign.");
                         message.setColor(ChatColor.RED);
                         p.spigot().sendMessage(message);
                         MicroGames.gameList.remove(i);
-                        return;
                     }
                 }
 

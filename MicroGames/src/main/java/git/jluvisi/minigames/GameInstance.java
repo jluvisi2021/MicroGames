@@ -4,14 +4,17 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import org.bukkit.Location;
+import org.bukkit.block.Sign;
 import org.bukkit.event.block.SignChangeEvent;
 
+import git.jluvisi.MicroGames;
 import git.jluvisi.util.ConfigManager;
 import git.jluvisi.util.Messages;
 import net.md_5.bungee.api.ChatColor;
 
 public class GameInstance {
 
+    private static MicroGames plugin;
     private Location signLocation;
     private ArrayList<GamePlayer> players;
     private boolean isActive;
@@ -43,6 +46,18 @@ public class GameInstance {
         isActive = false;
         this.gameID = gameID;
 
+    }
+
+    /**
+     * Hooks the Main Class to this plugin. Although this is not a great
+     * implementation I dont want to dependency inject each time we need to make a
+     * game instance object. On top of that the JavaPlugin is singleton so we can do
+     * this safely.
+     *
+     * @param plugin
+     */
+    public static final void hookJavaPlugin(MicroGames plugin) {
+        GameInstance.plugin = plugin;
     }
 
     public void generateGameUUID() {
@@ -90,6 +105,75 @@ public class GameInstance {
     }
 
     /**
+     * Adds a proper GamePlayer to the player list. Displays to all players who
+     * joined and how many more are needed.
+     *
+     * @param gp
+     * @param signJoin (If the player joined through a sign)
+     */
+    public void addPlayer(GamePlayer gp, boolean signJoin) {
+        this.players.add(gp);
+        int playersNeeded = (getMinPlayers() - getPlayers().size());
+        gp.getPlayer()
+                .sendMessage(ChatColor.GRAY + "Joined Lobby: " + ChatColor.GREEN + MicroGames.gameList.indexOf(this));
+        for (GamePlayer gamePlayer : getPlayers()) {
+            gamePlayer.getPlayer().sendMessage(ChatColor.GREEN + gp.getPlayer().getDisplayName() + ChatColor.GRAY
+                    + " has joined the lobby! " + ChatColor.DARK_GRAY + "(" + ChatColor.YELLOW + getPlayers().size()
+                    + ChatColor.GRAY + "/" + ChatColor.GOLD + getMaxPlayers() + ChatColor.DARK_GRAY + ")");
+
+            if (playersNeeded <= 0) {
+                gamePlayer.getPlayer().sendMessage(
+                        ChatColor.GRAY + "Game starting in: " + ChatColor.GREEN + getStartingTime() + " seconds!");
+            } else {
+                gamePlayer.getPlayer().sendMessage(ChatColor.GOLD + String.valueOf(playersNeeded) + " players "
+                        + ChatColor.GRAY + "needed to start the game.");
+            }
+        }
+        if (!signJoin) {
+            return;
+        }
+        updateSign(this);
+    }
+
+    /**
+     * Removes a player from a game.
+     *
+     * @param p
+     */
+    public void removePlayer(GamePlayer p) {
+        this.players.remove(p);
+        updateSign(this);
+    }
+
+    /**
+     * Updates the join sign to reflect the player amount.
+     *
+     * @apiNote Must hook into the main class before executed.
+     *
+     * @see MicroGames
+     * @see Messages
+     * @param instance
+     */
+    public static void updateSign(GameInstance instance) {
+        if (instance.getSignLocation() == null) {
+            return;
+        }
+        Sign sign = ((Sign) instance.getSignLocation().getBlock().getState());
+        sign.setLine(0, ChatColor.translateAlternateColorCodes('&',
+                Messages.GAME_SIGNS_LINE1.getLegacyMessage() + "[MicroGames]"));
+        sign.setLine(1, parseSignFromConfig(Messages.GAME_SIGNS_LINE2.getLegacyMessage(), instance));
+        sign.setLine(2, parseSignFromConfig(Messages.GAME_SIGNS_LINE3.getLegacyMessage(), instance));
+        sign.setLine(3, parseSignFromConfig(Messages.GAME_SIGNS_LINE4.getLegacyMessage(), instance));
+        if (instance.getMaxPlayers() == instance.getPlayers().size()) {
+            ConfigManager configYML = new ConfigManager(plugin, "config.yml");
+            final int line = configYML.getInt("game-signs.game-full-color-line") - 1;
+            sign.setLine(line, ChatColor.translateAlternateColorCodes('&',
+                    configYML.getString("game-signs.game-full-color") + sign.getLine(line)));
+        }
+        sign.update();
+    }
+
+    /**
      * Sets up the data for a sign that is placed.
      *
      * @param e
@@ -112,9 +196,11 @@ public class GameInstance {
      */
     private static String parseSignFromConfig(String node, GameInstance instance) {
         node = ChatColor.translateAlternateColorCodes('&', node);
-        node = node.replace("%curr_players%", "0");
+        node = node.replace("%curr_players%", String.valueOf(instance.getPlayers().size()));
         node = node.replace("%max_players%", String.valueOf(instance.getMaxPlayers()));
         node = node.replace("%winning_score%", String.valueOf(instance.getWinningScore()));
+        node = node.replace("%min_players%", String.valueOf(instance.getMinPlayers()));
+        node = node.replace("%is_active%", String.valueOf(instance.isActive()));
         return node;
     }
 

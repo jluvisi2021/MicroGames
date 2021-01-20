@@ -10,6 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import git.jluvisi.cmds.MicrogamesCommand;
 import git.jluvisi.events.DestroyGameEvent;
+import git.jluvisi.events.PlayerSignJoin;
 import git.jluvisi.events.SetupGameEvent;
 import git.jluvisi.events.SetupSignEvent;
 import git.jluvisi.minigames.GameInstance;
@@ -39,7 +40,13 @@ public class MicroGames extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        loadConfig();
+
+        saveDefaultConfig();
+
+        configYAML = new ConfigManager(this, "config.yml");
+        signsYAML = new ConfigManager(this, "signs.yml");
+        validateConfig(configYAML);
+
         registerCommands();
         registerEvents();
 
@@ -49,10 +56,19 @@ public class MicroGames extends JavaPlugin {
         getLogger().info("https://github.com/jluvisi2021/MicroGames");
         getLogger().info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
 
+        GameInstance.hookJavaPlugin(this);
         setupGameInstances();
+
         super.onEnable();
     }
 
+    /**
+     * Pulls all of the sign data from the signs.yml configuration file and parses
+     * it into the gameList arraylist.
+     * 
+     * @see GameInstance
+     * @see ConfigManager
+     */
     private void setupGameInstances() {
         ConfigurationSection minigameSection = signsYAML.getConfig().getConfigurationSection("minigame-signs.gameid");
         if (minigameSection == null) {
@@ -70,6 +86,8 @@ public class MicroGames extends JavaPlugin {
             int winningScore = Integer.parseInt(signsYAML.getString("minigame-signs.gameid." + key + ".winning-score"));
             GameInstance gameInstance = new GameInstance(UUID.fromString(key), instanceLocation, minPlayers, maxPlayers,
                     startingTime, winningScore);
+            // Reset the text of the sign in case of server crash.
+            GameInstance.updateSign(gameInstance);
             gameList.add(gameInstance);
         }
     }
@@ -95,23 +113,6 @@ public class MicroGames extends JavaPlugin {
     }
 
     /**
-     * Loads the config.yml and signs.yml files.
-     */
-    private void loadConfig() {
-        configYAML = new ConfigManager(this, "config.yml");
-        signsYAML = new ConfigManager(this, "signs.yml");
-        try {
-            configYAML.saveConfig();
-            configYAML.reloadConfig();
-            signsYAML.saveConfig();
-            signsYAML.reloadConfig();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        validateConfig(configYAML);
-    }
-
-    /**
      * A method that sets up the commands that this plugin has.
      */
     private void registerCommands() {
@@ -125,6 +126,7 @@ public class MicroGames extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new SetupSignEvent(this), this);
         getServer().getPluginManager().registerEvents(new SetupGameEvent(this), this);
         getServer().getPluginManager().registerEvents(new DestroyGameEvent(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerSignJoin(this), this);
     }
 
     @Override
@@ -145,9 +147,11 @@ public class MicroGames extends JavaPlugin {
         }
         // Check to see if any new game instances have been made since last restart.
         for (GameInstance gameInstance : MicroGames.gameList) {
-            if (gameInstance.getGameInstanceUUID() == null) {
+            if (gameInstance.getGameInstanceUUID() == null && gameInstance.getSignLocation() != null) {
                 gameInstance.generateGameUUID();
             }
+            // Reset the text of the sign in case of a server crash.
+            GameInstance.updateSign(gameInstance);
             // write all the game instances to config.
             if (signsYAML.getConfig()
                     .get("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString()) == null) {

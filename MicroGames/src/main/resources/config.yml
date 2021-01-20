@@ -21,19 +21,31 @@ messages:
   must-be-player: "&cYou must be a player to execute this command!"
   no-permission: "&cYou do not have permission to execute this command!"
   game-signs-disabled: "&cGame signs are currently disabled!"
+  game-full: "&cThe game is currently full!"
+  already-in-game: "&cYou are already in this game."
 
 # Permissions
 permissions:
   reload-config: "microgames.reload"
   setup-game-sign: "microgames.setupsign"
   destroy-game-sign: "microgames.destroysign"
+  use-join-sign: "microgames.join.sign"
 
 # Enable game signs. (Games can still be run with "/microgames start <param>")
 # You can edit the individual lines and colors of a sign when it is placed except for the first line (color can be adjusted).
-# Placeholders. %curr_players%, %max_players%, %winning_score%
+# Placeholders. %curr_players%, %max_players%, %winning_score%, %min_players%, %is_active%
 game-signs:
   enabled: true
+  sign-material: "OAK_SIGN"
   line1-color: "&0&l"
   line2: "%curr_players%/%max_players%"
   line3: "Winning Score: &9&l%winning_score%"
   line4: "&lCLICK TO JOIN"
+  game-full-color-line: 2 # The line to change on the sign when the game is full.
+  game-full-color: "&4" # The color to change that line.
+
+  # If clicking the sign should execute extra commands.
+  # The command is only executed if the sign is successfully joined.
+  # use %player% for player name
+  execute-commands:
+  - "me Testing 123...%player%"

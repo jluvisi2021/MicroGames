@@ -29,6 +29,7 @@ public class SetupGameEvent implements Listener {
 
     @EventHandler
     public void event(SignChangeEvent e) {
+        configYAML.reloadConfig();
         if (!configYAML.getBoolean("game-signs.enabled")) {
             return;
         }

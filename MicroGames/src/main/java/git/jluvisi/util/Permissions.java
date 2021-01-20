@@ -7,7 +7,7 @@ package git.jluvisi.util;
 public enum Permissions {
 
     RELOAD_CONFIG("permissions.reload-config"), SETUP_SIGN("permissions.setup-game-sign"),
-    DESTROY_SIGN("permissions.destroy-game-sign");
+    DESTROY_SIGN("permissions.destroy-game-sign"), JOIN_GAME("permissions.use-join-sign");
 
     private String node;
 

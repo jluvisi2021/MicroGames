@@ -3,6 +3,9 @@ package git.jluvisi.minigames;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 public class GamePlayer {
 
     private UUID playerUUID;
@@ -13,7 +16,7 @@ public class GamePlayer {
     /**
      * Sets up a GamePlayer. Game players are the individual players which have
      * joined a game instance.
-     * 
+     *
      * @param playerUUID
      * @param score
      */
@@ -41,6 +44,10 @@ public class GamePlayer {
 
     public void setTaskComplete(boolean b) {
         this.taskComplete = b;
+    }
+
+    public Player getPlayer() {
+        return Bukkit.getPlayer(playerUUID);
     }
 
     public ArrayList<Object> getData() {

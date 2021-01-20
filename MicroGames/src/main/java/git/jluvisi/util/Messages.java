@@ -16,7 +16,8 @@ public enum Messages {
 
     MUST_BE_PLAYER("messages.must-be-player"), NO_PERMISSION("messages.no-permission"),
     GAME_SIGNS_DISABLED("messages.game-signs-disabled"), GAME_SIGNS_LINE1("game-signs.line1-color"),
-    GAME_SIGNS_LINE2("game-signs.line2"), GAME_SIGNS_LINE3("game-signs.line3"), GAME_SIGNS_LINE4("game-signs.line4");
+    GAME_SIGNS_LINE2("game-signs.line2"), GAME_SIGNS_LINE3("game-signs.line3"), GAME_SIGNS_LINE4("game-signs.line4"),
+    GAME_FULL("messages.game-full"), IN_GAME_ALREADY("messages.already-in-game");
 
     /**
      * We use a static singleton reference here instead of dependency injection
