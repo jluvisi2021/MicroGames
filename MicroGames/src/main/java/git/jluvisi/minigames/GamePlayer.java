@@ -11,6 +11,15 @@ public class GamePlayer {
     private UUID playerUUID;
     private int score;
     private boolean taskComplete;
+    /**
+     * Adjustable player data is data which can be given to each gameplayer and
+     * managed by the game instance. Data can be used to keep track of important
+     * flags that there is not specific methods for.
+     *
+     * Each time data is checked it must be parsed from an object and have an index
+     * pulled from the arraylist.
+     *
+     */
     private ArrayList<Object> adjustablePlayerData;
 
     /**
@@ -19,6 +28,7 @@ public class GamePlayer {
      *
      * @param playerUUID
      * @param score
+     *
      */
     public GamePlayer(UUID playerUUID, int score) {
         this.playerUUID = playerUUID;
@@ -52,6 +62,22 @@ public class GamePlayer {
 
     public ArrayList<Object> getData() {
         return adjustablePlayerData;
+    }
+
+    public String getDataString(int index) {
+        return (String) this.adjustablePlayerData.get(index);
+    }
+
+    public int getDataInt(int index) {
+        return (int) this.adjustablePlayerData.get(index);
+    }
+
+    public double getDataDouble(int index) {
+        return (double) this.adjustablePlayerData.get(index);
+    }
+
+    public float getDataFloat(int index) {
+        return (float) this.adjustablePlayerData.get(index);
     }
 
 }

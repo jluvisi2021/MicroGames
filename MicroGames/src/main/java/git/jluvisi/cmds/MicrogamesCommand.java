@@ -73,17 +73,17 @@ public class MicrogamesCommand implements CommandExecutor {
                                                                 new FixedMetadataValue(plugin, "setup-begin"));
                                                 p.spigot().sendMessage(new ComponentBuilder(
                                                                 "Please type following arguments in one line.")
-                                                                                .color(ChatColor.YELLOW).append("\n")
-                                                                                .color(ChatColor.GRAY)
+                                                                                .italic(true).color(ChatColor.GRAY)
+                                                                                .append("\n")
                                                                                 .append("1. Number of players to start the game. (1-100)\n")
                                                                                 .append("2. Max number of players allowed. (2-100)\n")
                                                                                 .append("3. Winning Score for the game. (1-99)\n")
                                                                                 .append("4. Number of seconds until the game starts after players reach starting threshold. (10-300)\n")
-                                                                                .color(ChatColor.GRAY)
+                                                                                .reset().color(ChatColor.BLUE)
                                                                                 .append("Example: ")
-                                                                                .color(ChatColor.BLUE)
+                                                                                .color(ChatColor.DARK_AQUA)
                                                                                 .append("\"5 10 12 30\"")
-                                                                                .color(ChatColor.RESET).create());
+                                                                                .color(ChatColor.GRAY).create());
                                                 return true;
                                         }
                                 }

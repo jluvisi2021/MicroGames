@@ -29,6 +29,8 @@ public class SetupSignEvent implements Listener {
         this.configYAML = new ConfigManager(plugin, "config.yml");
     }
 
+    private Material signMaterial = Material.OAK_SIGN;
+
     @EventHandler
     public void event(AsyncPlayerChatEvent e) {
         configYAML.reloadConfig();
@@ -70,8 +72,13 @@ public class SetupSignEvent implements Listener {
                 return;
             }
 
+            // if the material from the config is valid.
+            if (SpigotHelper.isValidMaterial(configYAML.getString("game-signs.sign-material") + "_SIGN")) {
+                signMaterial = Material.getMaterial(configYAML.getString("game-signs.sign-material") + "_SIGN");
+            }
+
             // Setup the sign with the arguments
-            ItemStack sign = SpigotHelper.compactItem(Material.OAK_SIGN, ChatColor.YELLOW + "Game Sign", 1,
+            ItemStack sign = SpigotHelper.compactItem(signMaterial, ChatColor.YELLOW + "Game Sign", 1,
                     Arrays.asList(
                             ChatColor.GRAY.toString() + ChatColor.ITALIC.toString() + "Place this sign to activate it.",
                             ChatColor.GOLD + "Game Instance Settings:",

@@ -10,6 +10,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import git.jluvisi.MicroGames;
 import git.jluvisi.util.ConfigManager;
 import git.jluvisi.util.Permissions;
+import git.jluvisi.util.SpigotHelper;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 
@@ -24,11 +25,21 @@ public class DestroyGameEvent implements Listener {
         this.configYAML = new ConfigManager(plugin, "config.yml");
     }
 
+    Material signMaterial = Material.OAK_SIGN;
+    Material signMaterialWall = Material.OAK_WALL_SIGN;
+
     @EventHandler
     public void event(BlockBreakEvent e) {
         Player p = e.getPlayer();
+
+        // if the material from the config is valid.
+        if (SpigotHelper.isValidMaterial(configYAML.getString("game-signs.sign-material") + "_SIGN")) {
+            signMaterial = Material.getMaterial(configYAML.getString("game-signs.sign-material") + "_SIGN");
+            signMaterialWall = Material.getMaterial(configYAML.getString("game-signs.sign-material") + "_WALL_SIGN");
+        }
+
         // if the block broken is a sign
-        if (e.getBlock().getType() == Material.OAK_SIGN || e.getBlock().getType() == Material.OAK_WALL_SIGN) {
+        if (e.getBlock().getType() == signMaterial || e.getBlock().getType() == signMaterial) {
             Sign sign = (Sign) e.getBlock().getState();
             // If the first line is [MicroGames]
             if (sign.getLine(0).equals(ChatColor.translateAlternateColorCodes('&',

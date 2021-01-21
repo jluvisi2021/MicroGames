@@ -1,8 +1,10 @@
 package git.jluvisi.minigames;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
 import org.bukkit.event.block.SignChangeEvent;
@@ -21,8 +23,11 @@ public class GameInstance {
     private int maxPlayers;
     private int minPlayers;
     private int startingTime;
+    private int remaningTime;
     private int winningScore;
     private UUID gameID;
+    /** For accessing the current class */
+    private final GameInstance instance;
 
     /**
      * Handles the game instance object. Game instances are instances of games that
@@ -42,9 +47,11 @@ public class GameInstance {
         this.startingTime = startingTime;
         this.winningScore = winningScore;
         this.minPlayers = minPlayers;
-        players = new ArrayList<GamePlayer>();
-        isActive = false;
+        this.players = new ArrayList<GamePlayer>();
+        this.isActive = false;
         this.gameID = gameID;
+        this.remaningTime = startingTime;
+        this.instance = this;
 
     }
 
@@ -62,6 +69,33 @@ public class GameInstance {
 
     public void generateGameUUID() {
         gameID = UUID.randomUUID();
+    }
+
+    public int getRemaningTime() {
+        return this.remaningTime;
+    }
+
+    /**
+     * Sets the remaning time left until the game starts.
+     *
+     * @param i
+     */
+    public void setRemaningTime(int i) {
+        this.remaningTime = i;
+    }
+
+    /**
+     * Remove one second from remaning time.
+     */
+    public void remaningTimeTickDown() {
+        remaningTime--;
+    }
+
+    /**
+     * Reset the remaning time to default for the next game.
+     */
+    public void remaningTimeReset() {
+        remaningTime = startingTime;
     }
 
     public UUID getGameInstanceUUID() {
@@ -113,22 +147,46 @@ public class GameInstance {
      */
     public void addPlayer(GamePlayer gp, boolean signJoin) {
         this.players.add(gp);
-        int playersNeeded = (getMinPlayers() - getPlayers().size());
-        gp.getPlayer()
-                .sendMessage(ChatColor.GRAY + "Joined Lobby: " + ChatColor.GREEN + MicroGames.gameList.indexOf(this));
-        for (GamePlayer gamePlayer : getPlayers()) {
-            gamePlayer.getPlayer().sendMessage(ChatColor.GREEN + gp.getPlayer().getDisplayName() + ChatColor.GRAY
-                    + " has joined the lobby! " + ChatColor.DARK_GRAY + "(" + ChatColor.YELLOW + getPlayers().size()
-                    + ChatColor.GRAY + "/" + ChatColor.GOLD + getMaxPlayers() + ChatColor.DARK_GRAY + ")");
 
-            if (playersNeeded <= 0) {
-                gamePlayer.getPlayer().sendMessage(
-                        ChatColor.GRAY + "Game starting in: " + ChatColor.GREEN + getStartingTime() + " seconds!");
+        int playersNeeded = (getMinPlayers() - getPlayers().size());
+        boolean gameStarting = playersNeeded <= 0;
+
+        // Replace placeholders.
+        final LinkedHashMap<String, String> placeHolderMap = new LinkedHashMap<String, String>() {
+
+            private static final long serialVersionUID = -1719688454610734917L;
+
+            {
+                put("%player%", gp.getPlayer().getDisplayName());
+                put("%time_left%", String.valueOf(getRemaningTime()));
+                put("%players_needed%", String.valueOf(playersNeeded));
+                put("%players_in_lobby%", String.valueOf(getPlayers().size()));
+                put("%max_players_allowed%", String.valueOf(getMaxPlayers()));
+                put("%lobby_number%", String.valueOf(MicroGames.gameList.indexOf(instance)));
+
+            }
+        };
+
+        String playerLobbyJoinMessage = Messages.replacePlaceholder(Messages.PLAYER_LOBBY_JOIN.getLegacyMessage(),
+                placeHolderMap);
+        String globalPlayerJoinMessage = Messages
+                .replacePlaceholder(Messages.GLOBAL_PLAYER_LOBBY_JOIN.getLegacyMessage(), placeHolderMap);
+        String gameStartingMessage = Messages.replacePlaceholder(Messages.GAME_STARTING.getLegacyMessage(),
+                placeHolderMap);
+        String playersNeededMessage = Messages.replacePlaceholder(Messages.PLAYERS_NEEDED.getLegacyMessage(),
+                placeHolderMap);
+
+        // Send the messages from config.
+        gp.getPlayer().sendMessage(playerLobbyJoinMessage);
+        for (GamePlayer gamePlayer : getPlayers()) {
+            gamePlayer.getPlayer().sendMessage(globalPlayerJoinMessage);
+            if (gameStarting) {
+                gamePlayer.getPlayer().sendMessage(gameStartingMessage);
             } else {
-                gamePlayer.getPlayer().sendMessage(ChatColor.GOLD + String.valueOf(playersNeeded) + " players "
-                        + ChatColor.GRAY + "needed to start the game.");
+                gamePlayer.getPlayer().sendMessage(playersNeededMessage);
             }
         }
+
         if (!signJoin) {
             return;
         }
@@ -174,12 +232,17 @@ public class GameInstance {
     }
 
     /**
-     * Sets up the data for a sign that is placed.
+     * Sets up the data for a sign that is placed. Gets values from config using
+     * parseFromConfig()
+     *
+     * TODO: make this method use
+     * {@code Messages.replacePlaceholder(String, LinkedHashMap)}
      *
      * @param e
      * @param instance
      */
     public static void setupSignData(SignChangeEvent e, GameInstance instance, ConfigManager configYAML) {
+
         e.setLine(0, ChatColor.translateAlternateColorCodes('&',
                 Messages.GAME_SIGNS_LINE1.getLegacyMessage() + "[MicroGames]"));
         e.setLine(1, parseSignFromConfig(Messages.GAME_SIGNS_LINE2.getLegacyMessage(), instance));
@@ -188,7 +251,11 @@ public class GameInstance {
     }
 
     /**
-     * Parses the sign data from the config.yml file to the actual sign.
+     * <p>
+     * Parses the sign data from the config.yml file to the actual sign. Replaces
+     * place holders to their literal string values.
+     * </p>
+     * Also Parses chat colors.
      *
      * @param node
      * @param instance

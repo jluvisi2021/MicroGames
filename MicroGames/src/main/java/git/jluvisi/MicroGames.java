@@ -34,6 +34,12 @@ public class MicroGames extends JavaPlugin {
      * from correctly.
      */
     final float majorConfigVersion = 1.0F;
+    /**
+     * Manages the current games that are setup on the server. Games that are setup
+     * in signs are loaded from the config each time the server starts.
+     *
+     * @see GameInstance
+     */
     public static ArrayList<GameInstance> gameList = new ArrayList<GameInstance>();
     private ConfigManager configYAML;
     private ConfigManager signsYAML;
@@ -65,7 +71,7 @@ public class MicroGames extends JavaPlugin {
     /**
      * Pulls all of the sign data from the signs.yml configuration file and parses
      * it into the gameList arraylist.
-     * 
+     *
      * @see GameInstance
      * @see ConfigManager
      */
@@ -95,6 +101,7 @@ public class MicroGames extends JavaPlugin {
     /**
      * Checks to ensure that the configuration is updated to the latest version.
      *
+     * @see ConfigManager
      * @param configManager
      */
     private void validateConfig(ConfigManager configManager) {
@@ -114,6 +121,8 @@ public class MicroGames extends JavaPlugin {
 
     /**
      * A method that sets up the commands that this plugin has.
+     *
+     * @see MicrogamesCommand
      */
     private void registerCommands() {
         getCommand("microgames").setExecutor(new MicrogamesCommand(this));
@@ -121,6 +130,11 @@ public class MicroGames extends JavaPlugin {
 
     /**
      * A method that sets up the events for each event this plugin has.
+     *
+     * @see SetupSignEvent
+     * @see SetupGameEvent
+     * @see DestroyGameEvent
+     * @see PlayerSignJoin
      */
     private void registerEvents() {
         getServer().getPluginManager().registerEvents(new SetupSignEvent(this), this);

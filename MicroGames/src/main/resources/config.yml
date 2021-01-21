@@ -10,7 +10,7 @@
 # Version: 1.0-SNAPSHOT (Unfinished)
 # Author: Interryne/jluvisi2021
 # Github: https://github.com/jluvisi2021/MicroGames
-# If you need to reload your configuration or have other problems then go to the github "HELP" section in README.md! :D
+# If you need to reload your configuration, have lost comments, or have other problems then go to the github "HELP" section in README.md! :D
 
 # DO NOT EDIT #
 major-config-version: "1.0"
@@ -23,6 +23,12 @@ messages:
   game-signs-disabled: "&cGame signs are currently disabled!"
   game-full: "&cThe game is currently full!"
   already-in-game: "&cYou are already in this game."
+  # Messages for players in lobby
+  # Placeholders -> %player%, %time_left%, %players_needed%, %players_in_lobby%, %max_players_allowed%, %lobby_number%
+  player-lobby-join: "&7Joined Lobby: &6%lobby_number%"
+  global-player-lobby-join: "&a%player% &7has joined the lobby! &8(&e%players_in_lobby%&7/&6%max_players_allowed%&8)&7."
+  game-starting: "&7Game Starting in: &a%time_left% seconds!"
+  players-needed: "&6%players_needed% players &7needed to start the game!"
 
 # Permissions
 permissions:
@@ -36,7 +42,7 @@ permissions:
 # Placeholders. %curr_players%, %max_players%, %winning_score%, %min_players%, %is_active%
 game-signs:
   enabled: true
-  sign-material: "OAK_SIGN"
+  sign-material: "OAK" # DARK_OAK, ACACIA, SPRUCE, etc
   line1-color: "&0&l"
   line2: "%curr_players%/%max_players%"
   line3: "Winning Score: &9&l%winning_score%"
@@ -44,8 +50,8 @@ game-signs:
   game-full-color-line: 2 # The line to change on the sign when the game is full.
   game-full-color: "&4" # The color to change that line.
 
-  # If clicking the sign should execute extra commands.
+  # If clicking the sign should execute extra commands. You do not need a slash.
   # The command is only executed if the sign is successfully joined.
   # use %player% for player name
   execute-commands:
-  - "me Testing 123...%player%"
+#  - "me Testing 123...%player%"

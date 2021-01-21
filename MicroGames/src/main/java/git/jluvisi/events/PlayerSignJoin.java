@@ -1,6 +1,5 @@
 package git.jluvisi.events;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -15,18 +14,20 @@ import git.jluvisi.minigames.GamePlayer;
 import git.jluvisi.util.ConfigManager;
 import git.jluvisi.util.Messages;
 import git.jluvisi.util.Permissions;
+import git.jluvisi.util.SpigotHelper;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 
 public class PlayerSignJoin implements Listener {
 
     private final ConfigManager configYAML;
-    private final MicroGames plugin;
 
     public PlayerSignJoin(final MicroGames plugin) {
-        this.plugin = plugin;
         this.configYAML = new ConfigManager(plugin, "config.yml");
     }
+
+    private Material signMaterial = Material.OAK_SIGN;
+    private Material signMaterialWall = Material.OAK_WALL_SIGN;
 
     @EventHandler
     public void event(PlayerInteractEvent e) {
@@ -35,9 +36,14 @@ public class PlayerSignJoin implements Listener {
             return;
         }
 
+        // if the material from the config is valid.
+        if (SpigotHelper.isValidMaterial(configYAML.getString("game-signs.sign-material") + "_SIGN")) {
+            signMaterial = Material.getMaterial(configYAML.getString("game-signs.sign-material") + "_SIGN");
+            signMaterialWall = Material.getMaterial(configYAML.getString("game-signs.sign-material") + "_WALL_SIGN");
+        }
+
         // It is a sign
-        if (e.getClickedBlock().getType() != Material.OAK_WALL_SIGN
-                && e.getClickedBlock().getType() != Material.OAK_SIGN) {
+        if (e.getClickedBlock().getType() != signMaterial && e.getClickedBlock().getType() != signMaterialWall) {
             return;
         }
 
@@ -86,6 +92,7 @@ public class PlayerSignJoin implements Listener {
         }
         // Add the player to the game instance.
         MicroGames.gameList.get(index).addPlayer(gp, true);
+        // Execute commands
     }
 
 }
