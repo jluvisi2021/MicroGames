@@ -72,6 +72,9 @@ public class PlayerSignJoin implements Listener {
                 break;
             }
         }
+        if (instance == null) {
+            return;
+        }
         // if the instance can be joined.
         if (instance.getPlayers().size() >= instance.getMaxPlayers()) {
             p.spigot().sendMessage(new TextComponent(Messages.GAME_FULL.getMessage()));

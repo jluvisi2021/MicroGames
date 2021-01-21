@@ -68,6 +68,7 @@ public class SetupSignEvent implements Listener {
                         "One or more of your arguments to identify this game were incorrect. Please repeat the command and try again.")
                         .create());
                 p.removeMetadata("setup-begin", plugin);
+                p.removeMetadata("setup-game-name", plugin);
                 e.setCancelled(true);
                 return;
             }
@@ -82,6 +83,8 @@ public class SetupSignEvent implements Listener {
                     Arrays.asList(
                             ChatColor.GRAY.toString() + ChatColor.ITALIC.toString() + "Place this sign to activate it.",
                             ChatColor.GOLD + "Game Instance Settings:",
+                            ChatColor.GRAY + "Game Name: " + ChatColor.GREEN
+                                    + p.getMetadata("setup-game-name").get(0).asString(),
                             ChatColor.GRAY + "Minimum Players: " + ChatColor.GREEN + numMinPlayers,
                             ChatColor.GRAY + "Maximum Players: " + ChatColor.GREEN + numMaxPlayers,
                             ChatColor.GRAY + "Winning Score: " + ChatColor.GREEN + winningScore,

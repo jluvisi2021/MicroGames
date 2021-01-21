@@ -92,8 +92,7 @@ public class ConfigManager {
     }
 
     /**
-     * Set a specified value from the configuration file. This will both SAVE and
-     * RELOAD the configuration.
+     * Set a specified value from the configuration file. This will save the config.
      *
      * @param node
      * @param value
@@ -102,6 +101,6 @@ public class ConfigManager {
     public void setValue(String node, Object value) throws IOException {
         this.yamlConfig.set(node, value);
         this.yamlConfig.save(config);
-        this.reloadConfig();
+        // this.reloadConfig();
     }
 }

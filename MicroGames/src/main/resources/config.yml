@@ -24,8 +24,8 @@ messages:
   game-full: "&cThe game is currently full!"
   already-in-game: "&cYou are already in this game."
   # Messages for players in lobby
-  # Placeholders -> %player%, %time_left%, %players_needed%, %players_in_lobby%, %max_players_allowed%, %lobby_number%
-  player-lobby-join: "&7Joined Lobby: &6%lobby_number%"
+  # Placeholders -> %player%, %time_left%, %players_needed%, %players_in_lobby%, %max_players_allowed%, %game_name%
+  player-lobby-join: "&7Joined Lobby: &6%game_name%"
   global-player-lobby-join: "&a%player% &7has joined the lobby! &8(&e%players_in_lobby%&7/&6%max_players_allowed%&8)&7."
   game-starting: "&7Game Starting in: &a%time_left% seconds!"
   players-needed: "&6%players_needed% players &7needed to start the game!"
@@ -39,7 +39,7 @@ permissions:
 
 # Enable game signs. (Games can still be run with "/microgames start <param>")
 # You can edit the individual lines and colors of a sign when it is placed except for the first line (color can be adjusted).
-# Placeholders. %curr_players%, %max_players%, %winning_score%, %min_players%, %is_active%
+# Placeholders. %game_name%, %curr_players%, %max_players%, %winning_score%, %min_players%, %is_active%
 game-signs:
   enabled: true
   sign-material: "OAK" # DARK_OAK, ACACIA, SPRUCE, etc

@@ -2,9 +2,7 @@ package git.jluvisi.minigames;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
 import org.bukkit.event.block.SignChangeEvent;
@@ -25,7 +23,7 @@ public class GameInstance {
     private int startingTime;
     private int remaningTime;
     private int winningScore;
-    private UUID gameID;
+    private String gameID;
     /** For accessing the current class */
     private final GameInstance instance;
 
@@ -40,7 +38,7 @@ public class GameInstance {
      * @param startingTime
      * @param winningScore
      */
-    public GameInstance(UUID gameID, Location signLocation, int minPlayers, int maxPlayers, int startingTime,
+    public GameInstance(String gameID, Location signLocation, int minPlayers, int maxPlayers, int startingTime,
             int winningScore) {
         this.signLocation = signLocation;
         this.maxPlayers = maxPlayers;
@@ -67,8 +65,8 @@ public class GameInstance {
         GameInstance.plugin = plugin;
     }
 
-    public void generateGameUUID() {
-        gameID = UUID.randomUUID();
+    public void setGameID(String gameID) {
+        this.gameID = gameID;
     }
 
     public int getRemaningTime() {
@@ -98,12 +96,8 @@ public class GameInstance {
         remaningTime = startingTime;
     }
 
-    public UUID getGameInstanceUUID() {
+    public String getGameInstanceID() {
         return gameID;
-    }
-
-    public void setGameInstanceUUID(String u) {
-        this.gameID = UUID.fromString(u);
     }
 
     public ArrayList<GamePlayer> getPlayers() {
@@ -142,6 +136,9 @@ public class GameInstance {
      * Adds a proper GamePlayer to the player list. Displays to all players who
      * joined and how many more are needed.
      *
+     * @see Messages
+     * @see GamePlayer
+     *
      * @param gp
      * @param signJoin (If the player joined through a sign)
      */
@@ -162,7 +159,8 @@ public class GameInstance {
                 put("%players_needed%", String.valueOf(playersNeeded));
                 put("%players_in_lobby%", String.valueOf(getPlayers().size()));
                 put("%max_players_allowed%", String.valueOf(getMaxPlayers()));
-                put("%lobby_number%", String.valueOf(MicroGames.gameList.indexOf(instance)));
+                put("%game_name%", String
+                        .valueOf(MicroGames.gameList.get(MicroGames.gameList.indexOf(instance)).getGameInstanceID()));
 
             }
         };
@@ -204,6 +202,24 @@ public class GameInstance {
     }
 
     /**
+     * Goes through all of the game instances on the server and returns a game
+     * instance that has the name specified. If no game instance is found the method
+     * returns null.
+     *
+     * @param name
+     * @return
+     */
+    public static GameInstance getByName(String name) {
+        int size = MicroGames.gameList.size();
+        for (int i = 0; i < size; i++) {
+            if (MicroGames.gameList.get(i).getGameInstanceID().equals(name)) {
+                return MicroGames.gameList.get(i);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Updates the join sign to reflect the player amount.
      *
      * @apiNote Must hook into the main class before executed.
@@ -235,8 +251,6 @@ public class GameInstance {
      * Sets up the data for a sign that is placed. Gets values from config using
      * parseFromConfig()
      *
-     * TODO: make this method use
-     * {@code Messages.replacePlaceholder(String, LinkedHashMap)}
      *
      * @param e
      * @param instance
@@ -257,24 +271,35 @@ public class GameInstance {
      * </p>
      * Also Parses chat colors.
      *
+     * @see Messages
+     *
      * @param node
      * @param instance
      * @return
      */
     private static String parseSignFromConfig(String node, GameInstance instance) {
-        node = ChatColor.translateAlternateColorCodes('&', node);
-        node = node.replace("%curr_players%", String.valueOf(instance.getPlayers().size()));
-        node = node.replace("%max_players%", String.valueOf(instance.getMaxPlayers()));
-        node = node.replace("%winning_score%", String.valueOf(instance.getWinningScore()));
-        node = node.replace("%min_players%", String.valueOf(instance.getMinPlayers()));
-        node = node.replace("%is_active%", String.valueOf(instance.isActive()));
-        return node;
+        final LinkedHashMap<String, String> placeHolderMap = new LinkedHashMap<String, String>() {
+
+            private static final long serialVersionUID = -5348983518483308584L;
+
+            {
+                put("%game_name%", String.valueOf(instance.getGameInstanceID()));
+                put("%curr_players%", String.valueOf(instance.getPlayers().size()));
+                put("%max_players%", String.valueOf(instance.getMaxPlayers()));
+                put("%winning_score%", String.valueOf(instance.getWinningScore()));
+                put("%min_players%", String.valueOf(instance.getMinPlayers()));
+                put("%is_active%", String.valueOf(instance.isActive()));
+
+            }
+        };
+
+        return Messages.replacePlaceholder(node, placeHolderMap);
     }
 
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
-        str.append("UID: ").append(getGameInstanceUUID()).append("\n");
+        str.append("UID: ").append(getGameInstanceID()).append("\n");
         str.append("WORLD: ").append(getSignLocation().getWorld().getName()).append("\n");
         str.append("X: ").append(getSignLocation().getX()).append("\n");
         str.append("Y: ").append(getSignLocation().getY()).append("\n");

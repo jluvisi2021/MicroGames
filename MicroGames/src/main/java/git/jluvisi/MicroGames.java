@@ -2,8 +2,6 @@ package git.jluvisi;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.UUID;
-
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -90,8 +88,8 @@ public class MicroGames extends JavaPlugin {
             int maxPlayers = Integer.parseInt(signsYAML.getString("minigame-signs.gameid." + key + ".maximum-players"));
             int startingTime = Integer.parseInt(signsYAML.getString("minigame-signs.gameid." + key + ".starting-time"));
             int winningScore = Integer.parseInt(signsYAML.getString("minigame-signs.gameid." + key + ".winning-score"));
-            GameInstance gameInstance = new GameInstance(UUID.fromString(key), instanceLocation, minPlayers, maxPlayers,
-                    startingTime, winningScore);
+            GameInstance gameInstance = new GameInstance(key, instanceLocation, minPlayers, maxPlayers, startingTime,
+                    winningScore);
             // Reset the text of the sign in case of server crash.
             GameInstance.updateSign(gameInstance);
             gameList.add(gameInstance);
@@ -161,36 +159,39 @@ public class MicroGames extends JavaPlugin {
         }
         // Check to see if any new game instances have been made since last restart.
         for (GameInstance gameInstance : MicroGames.gameList) {
-            if (gameInstance.getGameInstanceUUID() == null && gameInstance.getSignLocation() != null) {
-                gameInstance.generateGameUUID();
+            if (gameInstance.getSignLocation() == null) {
+                continue;
             }
             // Reset the text of the sign in case of a server crash.
             GameInstance.updateSign(gameInstance);
             // write all the game instances to config.
             if (signsYAML.getConfig()
-                    .get("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString()) == null) {
+                    .get("minigame-signs.gameid." + gameInstance.getGameInstanceID().toString()) == null) {
                 try {
-                    signsYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString(), true);
-                    signsYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString()
-                            + ".location.world", gameInstance.getSignLocation().getWorld().getName());
+                    signsYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceID().toString(), true);
                     signsYAML.setValue(
-                            "minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString() + ".location.x",
+                            "minigame-signs.gameid." + gameInstance.getGameInstanceID().toString() + ".location.world",
+                            gameInstance.getSignLocation().getWorld().getName());
+                    signsYAML.setValue(
+                            "minigame-signs.gameid." + gameInstance.getGameInstanceID().toString() + ".location.x",
                             gameInstance.getSignLocation().getX());
                     signsYAML.setValue(
-                            "minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString() + ".location.y",
+                            "minigame-signs.gameid." + gameInstance.getGameInstanceID().toString() + ".location.y",
                             gameInstance.getSignLocation().getY());
                     signsYAML.setValue(
-                            "minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString() + ".location.z",
+                            "minigame-signs.gameid." + gameInstance.getGameInstanceID().toString() + ".location.z",
                             gameInstance.getSignLocation().getZ());
-                    signsYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString()
-                            + ".minimum-players", gameInstance.getMinPlayers());
-                    signsYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString()
-                            + ".maximum-players", gameInstance.getMaxPlayers());
                     signsYAML.setValue(
-                            "minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString() + ".starting-time",
+                            "minigame-signs.gameid." + gameInstance.getGameInstanceID().toString() + ".minimum-players",
+                            gameInstance.getMinPlayers());
+                    signsYAML.setValue(
+                            "minigame-signs.gameid." + gameInstance.getGameInstanceID().toString() + ".maximum-players",
+                            gameInstance.getMaxPlayers());
+                    signsYAML.setValue(
+                            "minigame-signs.gameid." + gameInstance.getGameInstanceID().toString() + ".starting-time",
                             gameInstance.getStartingTime());
                     signsYAML.setValue(
-                            "minigame-signs.gameid." + gameInstance.getGameInstanceUUID().toString() + ".winning-score",
+                            "minigame-signs.gameid." + gameInstance.getGameInstanceID().toString() + ".winning-score",
                             gameInstance.getWinningScore());
                     signsYAML.saveConfig();
                 } catch (IOException e) {
