@@ -43,7 +43,7 @@ public class SetupGameEvent implements Listener {
                     e.getBlock().getLocation(), Integer.parseInt(args[0]), Integer.parseInt(args[1]),
                     Integer.parseInt(args[3]), Integer.parseInt(args[2]));
             // Add the game instance to the signleton array
-            MicroGames.gameList.add(gameInstance);
+            plugin.getGameInstances().add(gameInstance);
             p.spigot().sendMessage(new ComponentBuilder("Game has been created.").color(ChatColor.GREEN).create());
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 5.0F, 1.0F);
 

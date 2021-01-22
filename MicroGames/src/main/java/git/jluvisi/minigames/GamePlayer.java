@@ -14,10 +14,17 @@ public class GamePlayer {
     /**
      * Adjustable player data is data which can be given to each gameplayer and
      * managed by the game instance. Data can be used to keep track of important
-     * flags that there is not specific methods for.
-     *
+     * flags that there is not specific methods for. <br>
+     * </br>
      * Each time data is checked it must be parsed from an object and have an index
-     * pulled from the arraylist.
+     * pulled from the arraylist. <br>
+     * </br>
+     * You can make a deep copy of this list by doing.
+     * <ul>
+     * <li>{@code deepCopy()}
+     *
+     * </ul>
+     *
      *
      */
     private ArrayList<Object> adjustablePlayerData;
@@ -66,6 +73,19 @@ public class GamePlayer {
 
     public String getDataString(int index) {
         return (String) this.adjustablePlayerData.get(index);
+    }
+
+    /**
+     * Makes a deep copy of the arraylist.
+     *
+     * @return Player Data
+     */
+    public ArrayList<Object> deepCopy() {
+        ArrayList<Object> copy = new ArrayList<Object>();
+        for (Object o : this.adjustablePlayerData) {
+            copy.add(o);
+        }
+        return copy;
     }
 
     public int getDataInt(int index) {

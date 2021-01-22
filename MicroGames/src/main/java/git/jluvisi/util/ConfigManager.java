@@ -22,7 +22,17 @@ public class ConfigManager {
     private final String fileName;
 
     /**
-     * Setup the constructor for one individual configuration file.
+     * <h3>Allows direct interaction with Configuration files.</h3> <br>
+     * </br>
+     * Current Configuration Files:
+     * <ul>
+     * <li>config.yml</li>
+     * <li>signs.yml</li>
+     * </ul>
+     * <br>
+     * </br>
+     *
+     *
      *
      * @param plugin
      * @param fileName

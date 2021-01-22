@@ -205,7 +205,7 @@ public class MicrogamesCommand implements CommandExecutor {
                 p.setMetadata("setup-begin", new FixedMetadataValue(plugin, "setup-begin"));
                 p.setMetadata("setup-game-name", new FixedMetadataValue(plugin, args[1]));
                 p.spigot().sendMessage(new ComponentBuilder("Please type following arguments in one line.").italic(true)
-                                .color(ChatColor.GRAY).append("\n")
+                                .color(ChatColor.GRAY).append("\n").reset().color(ChatColor.BLUE)
                                 .append("1. Number of players to start the game. (1-100)\n")
                                 .append("2. Max number of players allowed. (2-100)\n")
                                 .append("3. Winning Score for the game. (1-99)\n")

@@ -23,6 +23,7 @@ messages:
   game-signs-disabled: "&cGame signs are currently disabled!"
   game-full: "&cThe game is currently full!"
   already-in-game: "&cYou are already in this game."
+  must-leave-game: "&cYou must leave your current game to join that game."
   # Messages for players in lobby
   # Placeholders -> %player%, %time_left%, %players_needed%, %players_in_lobby%, %max_players_allowed%, %game_name%
   player-lobby-join: "&7Joined Lobby: &6%game_name%"
@@ -52,6 +53,10 @@ game-signs:
 
   # If clicking the sign should execute extra commands. You do not need a slash.
   # The command is only executed if the sign is successfully joined.
+  # The top will execute commands like the player is doing them while the bottom will execute from the console.
   # use %player% for player name
-  execute-commands:
+  execute-player-commands:
 #  - "me Testing 123...%player%"
+  execute-console-commands:
+#  - "give %player% minecraft:cooked_beef 1"
+

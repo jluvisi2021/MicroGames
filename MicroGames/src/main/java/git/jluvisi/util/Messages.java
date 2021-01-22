@@ -18,7 +18,17 @@ import net.md_5.bungee.api.chat.hover.content.Text;
 /**
  * Manage the messages in the plugin. This class stores the paths in the config
  * as enums which can then be converted from enums to BaseComponent[] from the
- * getMessage() method.
+ * getMessage() method. <br>
+ * </br>
+ * Get a message using the {@code getMessage()}.<br>
+ * Raw, string messages can be obtained through {@code getLegacyMessage()}</br>
+ *
+ * <pre>
+ * Example:
+ * {@code
+ * player.spigot().sendMessage(new TextComponent(Messages.MUST_BE_PLAYER.getMessage()))
+ * }
+ * </pre>
  */
 public enum Messages {
 
@@ -27,11 +37,13 @@ public enum Messages {
     GAME_SIGNS_LINE2("game-signs.line2"), GAME_SIGNS_LINE3("game-signs.line3"), GAME_SIGNS_LINE4("game-signs.line4"),
     GAME_FULL("messages.game-full"), IN_GAME_ALREADY("messages.already-in-game"),
     PLAYER_LOBBY_JOIN("messages.player-lobby-join"), GLOBAL_PLAYER_LOBBY_JOIN("messages.global-player-lobby-join"),
-    GAME_STARTING("messages.game-starting"), PLAYERS_NEEDED("messages.players-needed");
+    GAME_STARTING("messages.game-starting"), PLAYERS_NEEDED("messages.players-needed"),
+    MUST_LEAVE_GAME("messages.must-leave-game");
 
     /**
      * We use a static singleton reference here instead of dependency injection
      * because the enum is a static class.
+     *
      */
     private static final ConfigManager configYAML = new ConfigManager(JavaPlugin.getPlugin(MicroGames.class),
             "config.yml");
@@ -52,13 +64,27 @@ public enum Messages {
      * configuration file. This method will replace all placeholders with their
      * respective values.
      *
-     * @apiNote {@code replaceValue} must have keys be placeholders and values be
-     *          the data to replace with.
+     * @apiNote {@code replaceValue} uses a {@link LinkedHashMap} where the keys are
+     *          expected to be the placeholders and the values are expected to be
+     *          the data to replace the placeholders with.
      *
      * @param value        (String to replace placeholders on)
      * @param replaceValue (Actual placeholder, New Value)
      *
-     * @return replaced string
+     *                     Set the placeholders of this hashmap like so:
+     *
+     *                     <pre>
+     {@code
+    
+          final LinkedHashMap<String, String> placeHolderMap = new LinkedHashMap<String, String>() {
+    {
+        put("%placeholder%", String.valueOf(configString));
+    
+    }
+      };
+     *                     </pre>
+     *
+     *                     @return replaced string
      */
     public static String replacePlaceholder(String value, LinkedHashMap<String, String> replaceValue) {
         for (Map.Entry<String, String> entry : replaceValue.entrySet()) {

@@ -2,7 +2,7 @@ package git.jluvisi.minigames;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-
+import java.util.UUID;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
 import org.bukkit.event.block.SignChangeEvent;
@@ -159,8 +159,8 @@ public class GameInstance {
                 put("%players_needed%", String.valueOf(playersNeeded));
                 put("%players_in_lobby%", String.valueOf(getPlayers().size()));
                 put("%max_players_allowed%", String.valueOf(getMaxPlayers()));
-                put("%game_name%", String
-                        .valueOf(MicroGames.gameList.get(MicroGames.gameList.indexOf(instance)).getGameInstanceID()));
+                put("%game_name%", String.valueOf(plugin.getGameInstances()
+                        .get(plugin.getGameInstances().indexOf(instance)).getGameInstanceID()));
 
             }
         };
@@ -210,13 +210,30 @@ public class GameInstance {
      * @return
      */
     public static GameInstance getByName(String name) {
-        int size = MicroGames.gameList.size();
+        int size = plugin.getGameInstances().size();
         for (int i = 0; i < size; i++) {
-            if (MicroGames.gameList.get(i).getGameInstanceID().equals(name)) {
-                return MicroGames.gameList.get(i);
+            if (plugin.getGameInstances().get(i).getGameInstanceID().equals(name)) {
+                return plugin.getGameInstances().get(i);
             }
         }
         return null;
+    }
+
+    /**
+     * Checks if the class contains a player with a specified UUID.
+     *
+     * @see GamePlayer
+     *
+     * @param u
+     * @return
+     */
+    public boolean containsPlayer(UUID u) {
+        for (GamePlayer p : this.players) {
+            if (p.getPlayer().getUniqueId().equals(u)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -299,7 +316,7 @@ public class GameInstance {
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
-        str.append("UID: ").append(getGameInstanceID()).append("\n");
+        str.append("NAME: ").append(getGameInstanceID()).append("\n");
         str.append("WORLD: ").append(getSignLocation().getWorld().getName()).append("\n");
         str.append("X: ").append(getSignLocation().getX()).append("\n");
         str.append("Y: ").append(getSignLocation().getY()).append("\n");

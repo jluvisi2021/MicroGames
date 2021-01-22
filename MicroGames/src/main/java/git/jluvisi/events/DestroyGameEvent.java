@@ -15,14 +15,27 @@ import git.jluvisi.util.SpigotHelper;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 
-/**
- * Handles when a player has destroyed a game sign.
- */
 public class DestroyGameEvent implements Listener {
 
     private final ConfigManager configYAML;
+    private final MicroGames plugin;
 
-    public DestroyGameEvent(final MicroGames plugin) {
+    /**
+     * Handles when the player destroys a game sign. What we check:
+     * <ul>
+     * <li>If the Sign Material in Config is valid.</li>
+     * <li>If the block broken is a sign.</li>
+     * <li>If its first line has {@code [MicroGames]} with Config line 1
+     * formatting.</li>
+     * <li>If they have permission to destroy the sign.</li>
+     * <li>If the location of the sign is in the {@code plugin.getGameInstances()}
+     * list.
+     * </ul>
+     *
+     * @param plugin
+     */
+    public DestroyGameEvent(MicroGames plugin) {
+        this.plugin = plugin;
         this.configYAML = new ConfigManager(plugin, "config.yml");
     }
 
@@ -55,13 +68,14 @@ public class DestroyGameEvent implements Listener {
             }
 
             // Then we remove the sign from the arraylist.
-            int size = MicroGames.gameList.size();
+            int size = plugin.getGameInstances().size();
             for (int i = 0; i < size; i++) {
-                if (MicroGames.gameList.get(i).getSignLocation().getWorld().equals(sign.getLocation().getWorld())) {
-                    if (MicroGames.gameList.get(i).getSignLocation().getX() == sign.getLocation().getX()
-                            && MicroGames.gameList.get(i).getSignLocation().getY() == sign.getLocation().getY()
-                            && MicroGames.gameList.get(i).getSignLocation().getZ() == sign.getLocation().getZ()) {
-                        MicroGames.gameList.remove(i);
+                if (plugin.getGameInstances().get(i).getSignLocation().getWorld()
+                        .equals(sign.getLocation().getWorld())) {
+                    if (plugin.getGameInstances().get(i).getSignLocation().getX() == sign.getLocation().getX()
+                            && plugin.getGameInstances().get(i).getSignLocation().getY() == sign.getLocation().getY()
+                            && plugin.getGameInstances().get(i).getSignLocation().getZ() == sign.getLocation().getZ()) {
+                        plugin.getGameInstances().remove(i);
                         p.sendMessage(ChatColor.RED + "Destroyed Game Sign.");
                     }
 

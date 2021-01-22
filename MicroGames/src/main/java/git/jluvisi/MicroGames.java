@@ -12,16 +12,47 @@ import git.jluvisi.events.PlayerSignJoin;
 import git.jluvisi.events.SetupGameEvent;
 import git.jluvisi.events.SetupSignEvent;
 import git.jluvisi.minigames.GameInstance;
+import git.jluvisi.minigames.GamePlayer;
 import git.jluvisi.util.ConfigManager;
 import net.md_5.bungee.api.ChatColor;
 
 /**
  *
- * Plugin Note: Microgames is a Spigot plugin for 1.16.5 which has little
- * minigames in which people on a server can participate in!
+ * <h1>MicroGames</h1> Plugin Note: Microgames is a Spigot plugin for 1.16.5
+ * which has little minigames in which people on a server can participate in.
+ * <br>
+ * </br>
+ * Structure: Each player can join a game which is known as a
+ * {@link GameInstance}. When a player joins a {@link GameInstance} they are
+ * transformed into a {@link GamePlayer}. {@link GamePlayer}s are Players but
+ * with more attributes to make it easier to handle progressing through
+ * minigames. When ever a player wins a game they are awarded score and
+ * whichever player gets the set score for that {@link GameInstance} wins. <br>
+ * </br>
+ * All game instances on the server are tracked with the {@code gameList}
+ * ArrayList. Retrieve the game list like so...
+ *
+ * <pre>
+ *
+ * public class SomeClass {
+ *     private final MicroGames plugin;
+ *
+ *     public SomeClass(MicroGames plugin) {
+ *         this.plugin = plugin;
+ *     }
+ *
+ *     private void someMethod() {
+ *         plugin.getGameInstances().accessMethod();
+ *     }
+ * }
+ *
+ * </pre>
+ *
+ * <a href="https://github.com/jluvisi2021/MicroGames/">All of this code is on my personal GitHub.</a>
  *
  * @author Interryne/jluvisi2021
  * @version 1.0-SNAPSHOT
+ * @since 1/19/2021
  *
  */
 public class MicroGames extends JavaPlugin {
@@ -38,7 +69,7 @@ public class MicroGames extends JavaPlugin {
      *
      * @see GameInstance
      */
-    public static ArrayList<GameInstance> gameList = new ArrayList<GameInstance>();
+    private final ArrayList<GameInstance> gameList = new ArrayList<GameInstance>();
     private ConfigManager configYAML;
     private ConfigManager signsYAML;
 
@@ -64,6 +95,10 @@ public class MicroGames extends JavaPlugin {
         setupGameInstances();
 
         super.onEnable();
+    }
+
+    public ArrayList<GameInstance> getGameInstances() {
+        return this.gameList;
     }
 
     /**
@@ -123,6 +158,9 @@ public class MicroGames extends JavaPlugin {
      * @see MicrogamesCommand
      */
     private void registerCommands() {
+        if (!isEnabled()) {
+            return;
+        }
         getCommand("microgames").setExecutor(new MicrogamesCommand(this));
     }
 
@@ -135,6 +173,9 @@ public class MicroGames extends JavaPlugin {
      * @see PlayerSignJoin
      */
     private void registerEvents() {
+        if (!isEnabled()) {
+            return;
+        }
         getServer().getPluginManager().registerEvents(new SetupSignEvent(this), this);
         getServer().getPluginManager().registerEvents(new SetupGameEvent(this), this);
         getServer().getPluginManager().registerEvents(new DestroyGameEvent(this), this);
@@ -158,7 +199,7 @@ public class MicroGames extends JavaPlugin {
             e1.printStackTrace();
         }
         // Check to see if any new game instances have been made since last restart.
-        for (GameInstance gameInstance : MicroGames.gameList) {
+        for (GameInstance gameInstance : gameList) {
             if (gameInstance.getSignLocation() == null) {
                 continue;
             }
