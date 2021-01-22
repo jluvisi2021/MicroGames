@@ -22,6 +22,10 @@ import git.jluvisi.util.SpigotHelper;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 
+/**
+ * Handles when the user attempts to join the game through a sign. Also executes
+ * commands from config.
+ */
 public class PlayerSignJoin implements Listener {
 
     private final ConfigManager configYAML;
@@ -32,7 +36,9 @@ public class PlayerSignJoin implements Listener {
         this.configYAML = new ConfigManager(plugin, "config.yml");
     }
 
+    /** Material of the sign to check. Default is OAK */
     private Material signMaterial = Material.OAK_SIGN;
+    /** Material of the sign to check. (Wall) Default is OAK */
     private Material signMaterialWall = Material.OAK_WALL_SIGN;
 
     @EventHandler
@@ -53,7 +59,7 @@ public class PlayerSignJoin implements Listener {
             return;
         }
 
-        Player p = e.getPlayer();
+        final Player p = e.getPlayer();
 
         // Signs are enabled.
         if (!configYAML.getBoolean("game-signs.enabled")) {
@@ -61,7 +67,7 @@ public class PlayerSignJoin implements Listener {
             return;
         }
 
-        Sign sign = (Sign) e.getClickedBlock().getState();
+        final Sign sign = (Sign) e.getClickedBlock().getState();
         // Has [MicroGames]
         if (!sign.getLine(0).equals(ChatColor.translateAlternateColorCodes('&',
                 configYAML.getString("game-signs.line1-color") + "[MicroGames]"))) {
@@ -78,7 +84,7 @@ public class PlayerSignJoin implements Listener {
                 break;
             }
         }
-
+        // The instance does not exist for the sign.
         if (instance == null) {
             return;
         }
@@ -88,13 +94,13 @@ public class PlayerSignJoin implements Listener {
             return;
         }
         // The player has the permission.
-        if (!e.getPlayer().hasPermission(Permissions.JOIN_GAME.toString())) {
+        if (!p.hasPermission(Permissions.JOIN_GAME.toString())) {
             p.spigot().sendMessage(new TextComponent(Messages.NO_PERMISSION.getMessage()));
             return;
         }
 
         // Check if the player is already in a game.
-        GamePlayer gp = new GamePlayer(e.getPlayer().getUniqueId(), 0);
+        final GamePlayer gp = new GamePlayer(p.getUniqueId(), 0);
         if (instance.containsPlayer(p.getUniqueId())) {
             p.spigot().sendMessage(new TextComponent(Messages.IN_GAME_ALREADY.getMessage()));
             return;
@@ -108,7 +114,7 @@ public class PlayerSignJoin implements Listener {
             }
         }
         // Add the player to the game instance.
-        plugin.getGameInstances().get(index).addPlayer(gp, true);
+        plugin.getGameInstances().get(index).addPlayer(gp);
         // Execute commands
         final ImmutableSet<String> playerCommands = ImmutableSet
                 .copyOf(configYAML.getStringList("game-signs.execute-player-commands"));

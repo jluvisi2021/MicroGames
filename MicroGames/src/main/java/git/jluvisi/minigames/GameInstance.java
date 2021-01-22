@@ -9,13 +9,15 @@ import org.bukkit.block.Sign;
 import org.bukkit.event.block.SignChangeEvent;
 
 import git.jluvisi.MicroGames;
+import git.jluvisi.events.SetupSignEvent;
 import git.jluvisi.util.ConfigManager;
 import git.jluvisi.util.Messages;
 import net.md_5.bungee.api.ChatColor;
 
+/**
+ * Repersents a GameInstance object which can be run on the server.
+ */
 public class GameInstance {
-
-    private static MicroGames plugin;
     private Location signLocation;
     private ArrayList<GamePlayer> players;
     private boolean isActive;
@@ -25,8 +27,8 @@ public class GameInstance {
     private int remaningTime;
     private int winningScore;
     private String gameID;
+
     /** For accessing the current class */
-    private final GameInstance instance;
 
     /**
      * Handles the game instance object. Game instances are instances of games that
@@ -50,26 +52,23 @@ public class GameInstance {
         this.isActive = false;
         this.gameID = gameID;
         this.remaningTime = startingTime;
-        this.instance = this;
-
     }
 
     /**
-     * Hooks the Main Class to this plugin. Although this is not a great
-     * implementation I dont want to dependency inject each time we need to make a
-     * game instance object. On top of that the JavaPlugin is singleton so we can do
-     * this safely.
+     * Set the name of the game. This name is also used in the config for storage if
+     * the game is a sign.
      *
-     * @param plugin
+     * @param gameID
      */
-    public static final void hookJavaPlugin(MicroGames plugin) {
-        GameInstance.plugin = plugin;
-    }
-
     public void setGameID(String gameID) {
         this.gameID = gameID;
     }
 
+    /**
+     * Returns the remaning time the game has before it starts.
+     *
+     * @return Remaning Time
+     */
     public int getRemaningTime() {
         return this.remaningTime;
     }
@@ -97,38 +96,93 @@ public class GameInstance {
         remaningTime = startingTime;
     }
 
+    /**
+     * Returns the GameID or name of the game.
+     *
+     * @return
+     */
     public String getGameInstanceID() {
         return gameID;
     }
 
+    /**
+     * Returns a list of all of the {@link GamePlayer} objects that are currently in
+     * the {@link GameInstance}.
+     *
+     * @return List of {@link GamePlayer}
+     */
     public ArrayList<GamePlayer> getPlayers() {
         return players;
     }
 
+    /**
+     * Returns whether or not the game is currently active and minigames have
+     * started. A game being inside of a lobby waiting for players or the
+     * {@code getRemaningTime()} > 0 repersents that the game has not officially
+     * started yet.
+     *
+     * @return if the game is running
+     */
     public boolean isActive() {
         return isActive;
     }
 
+    /**
+     * Sets the game active. This will trigger the starting of the minigames.
+     *
+     * @param b
+     */
     public void setActive(boolean b) {
         this.isActive = b;
     }
 
+    /**
+     * Gets the winning score set when the game was created.
+     *
+     * @return winningScore
+     */
     public int getWinningScore() {
         return winningScore;
     }
 
+    /**
+     * Gets the starting time that was set when the game was created. The starting
+     * time variable is <strong>NOT</strong> modified when the game begins counting
+     * down.
+     *
+     * @return startingTime
+     */
     public int getStartingTime() {
         return startingTime;
     }
 
+    /**
+     * Returns the maximum allowed players that can be present in the lobby at once.
+     * This variable is set during game creation.
+     *
+     * @return maxPlayers
+     */
     public int getMaxPlayers() {
         return maxPlayers;
     }
 
+    /**
+     * Returns the actual location of the sign that was placed when the game was
+     * created. If the game is a <i>Volatile-State</i> then this returns null.
+     *
+     * @see SetupSignEvent
+     * @return Location Object of sign.
+     */
     public Location getSignLocation() {
         return signLocation;
     }
 
+    /**
+     * Gets the minimum players required for the game to start counting down. This
+     * value was set during game creation.
+     *
+     * @return minPlayers
+     */
     public int getMinPlayers() {
         return minPlayers;
     }
@@ -141,44 +195,33 @@ public class GameInstance {
      * @see GamePlayer
      *
      * @param gp
-     * @param signJoin (If the player joined through a sign)
      */
-    public void addPlayer(GamePlayer gp, boolean signJoin) {
+    public void addPlayer(GamePlayer gp) {
         this.players.add(gp);
 
-        int playersNeeded = (getMinPlayers() - getPlayers().size());
-        boolean gameStarting = playersNeeded <= 0;
-
-        // Replace placeholders.
-
-        String playerLobbyJoinMessage = Messages.replacePlaceholder(Messages.PLAYER_LOBBY_JOIN.getLegacyMessage(),
-                getPlaceholders(gp));
-        String globalPlayerJoinMessage = Messages
-                .replacePlaceholder(Messages.GLOBAL_PLAYER_LOBBY_JOIN.getLegacyMessage(), getPlaceholders(gp));
-        String gameStartingMessage = Messages.replacePlaceholder(Messages.GAME_STARTING.getLegacyMessage(),
-                getPlaceholders(gp));
-        String playersNeededMessage = Messages.replacePlaceholder(Messages.PLAYERS_NEEDED.getLegacyMessage(),
-                getPlaceholders(gp));
-
         // Send the messages from config.
-        gp.getPlayer().sendMessage(playerLobbyJoinMessage);
+        gp.getPlayer().sendMessage(
+                Messages.replacePlaceholder(Messages.PLAYER_LOBBY_JOIN.getLegacyMessage(), getPlaceholders(gp)));
         for (GamePlayer gamePlayer : getPlayers()) {
-            gamePlayer.getPlayer().sendMessage(globalPlayerJoinMessage);
-            if (gameStarting) {
-                gamePlayer.getPlayer().sendMessage(gameStartingMessage);
+            gamePlayer.getPlayer().sendMessage(Messages
+                    .replacePlaceholder(Messages.GLOBAL_PLAYER_LOBBY_JOIN.getLegacyMessage(), getPlaceholders(gp)));
+            if (getMinPlayers() - getPlayers().size() <= 0) {
+                gamePlayer.getPlayer().sendMessage(
+                        Messages.replacePlaceholder(Messages.GAME_STARTING.getLegacyMessage(), getPlaceholders(gp)));
             } else {
-                gamePlayer.getPlayer().sendMessage(playersNeededMessage);
+                gamePlayer.getPlayer().sendMessage(
+                        Messages.replacePlaceholder(Messages.PLAYERS_NEEDED.getLegacyMessage(), getPlaceholders(gp)));
             }
         }
-
-        if (!signJoin) {
-            return;
-        }
+        // Update all game signs.
         updateSign(this);
     }
 
     /**
-     * Removes a player from a game.
+     * Removes a player from a game. Will update signs.
+     *
+     * @see GamePlayer
+     * @see Messages
      *
      * @param p
      */
@@ -211,12 +254,37 @@ public class GameInstance {
                 put("%players_needed%", String.valueOf((getMinPlayers() - getPlayers().size())));
                 put("%players_in_lobby%", String.valueOf(getPlayers().size()));
                 put("%max_players_allowed%", String.valueOf(getMaxPlayers()));
-                put("%game_name%", String.valueOf(plugin.getGameInstances()
-                        .get(plugin.getGameInstances().indexOf(instance)).getGameInstanceID()));
+                put("%game_name%", getGameInstanceID());
 
             }
         };
         return placeHolderMap;
+    }
+
+    /**
+     * Updates the join sign to reflect the player amount.
+     *
+     * @see MicroGames
+     * @see Messages
+     * @param instance
+     */
+    public static void updateSign(GameInstance instance) {
+        if (instance.getSignLocation() == null) {
+            return;
+        }
+        final Sign sign = ((Sign) instance.getSignLocation().getBlock().getState());
+        sign.setLine(0, ChatColor.translateAlternateColorCodes('&',
+                Messages.GAME_SIGNS_LINE1.getLegacyMessage() + "[MicroGames]"));
+        sign.setLine(1, parseSignFromConfig(Messages.GAME_SIGNS_LINE2.getLegacyMessage(), instance));
+        sign.setLine(2, parseSignFromConfig(Messages.GAME_SIGNS_LINE3.getLegacyMessage(), instance));
+        sign.setLine(3, parseSignFromConfig(Messages.GAME_SIGNS_LINE4.getLegacyMessage(), instance));
+        // If all of the players that can join the game are in then we can set the
+        // "players full line" of the sign to the specified color.
+        if (instance.getMaxPlayers() == instance.getPlayers().size()) {
+            final int line = Integer.parseInt(Messages.GAME_SIGNS_GAME_COLOR_LINE.getLegacyMessage()) - 1;
+            sign.setLine(line, Messages.GAME_SIGNS_GAME_FULL_COLOR.getLegacyMessage() + sign.getLine(line));
+        }
+        sign.update();
     }
 
     /**
@@ -229,11 +297,11 @@ public class GameInstance {
      * @param name
      * @return
      */
-    public static GameInstance getByName(String name) {
-        int size = plugin.getGameInstances().size();
+    public static GameInstance getByName(ArrayList<GameInstance> list, String name) {
+        final int size = list.size();
         for (int i = 0; i < size; i++) {
-            if (plugin.getGameInstances().get(i).getGameInstanceID().equals(name)) {
-                return plugin.getGameInstances().get(i);
+            if (list.get(i).getGameInstanceID().equals(name)) {
+                return list.get(i);
             }
         }
         return null;
@@ -244,14 +312,14 @@ public class GameInstance {
      * specific player is in.
      *
      * Returns null if no player is found.
-     * 
+     *
      * @apiNote O(n^2)
      *
      * @param UUID
      * @return
      */
-    public static GameInstance getPlayerGame(UUID UUID) {
-        for (GameInstance instance : plugin.getGameInstances()) {
+    public static GameInstance getPlayerGame(ArrayList<GameInstance> list, UUID UUID) {
+        for (GameInstance instance : list) {
             for (GamePlayer player : instance.getPlayers()) {
                 if (player.getPlayerUUID() == UUID) {
                     return instance;
@@ -298,36 +366,8 @@ public class GameInstance {
     }
 
     /**
-     * Updates the join sign to reflect the player amount.
-     *
-     * @apiNote Must hook into the main class before executed.
-     *
-     * @see MicroGames
-     * @see Messages
-     * @param instance
-     */
-    public static void updateSign(GameInstance instance) {
-        if (instance.getSignLocation() == null) {
-            return;
-        }
-        Sign sign = ((Sign) instance.getSignLocation().getBlock().getState());
-        sign.setLine(0, ChatColor.translateAlternateColorCodes('&',
-                Messages.GAME_SIGNS_LINE1.getLegacyMessage() + "[MicroGames]"));
-        sign.setLine(1, parseSignFromConfig(Messages.GAME_SIGNS_LINE2.getLegacyMessage(), instance));
-        sign.setLine(2, parseSignFromConfig(Messages.GAME_SIGNS_LINE3.getLegacyMessage(), instance));
-        sign.setLine(3, parseSignFromConfig(Messages.GAME_SIGNS_LINE4.getLegacyMessage(), instance));
-        if (instance.getMaxPlayers() == instance.getPlayers().size()) {
-            ConfigManager configYML = new ConfigManager(plugin, "config.yml");
-            final int line = configYML.getInt("game-signs.game-full-color-line") - 1;
-            sign.setLine(line, ChatColor.translateAlternateColorCodes('&',
-                    configYML.getString("game-signs.game-full-color") + sign.getLine(line)));
-        }
-        sign.update();
-    }
-
-    /**
      * Sets up the data for a sign that is placed. Gets values from config using
-     * parseFromConfig()
+     * {@code parseFromConfig()}
      *
      *
      * @param e
@@ -374,6 +414,23 @@ public class GameInstance {
         return Messages.replacePlaceholder(node, placeHolderMap);
     }
 
+    /**
+     * Returns the {@link GameInstance} as a String.
+     * <ul>
+     * <li><strong>Values Returned</strong></li>
+     * <li>Name</li>
+     * <li>World</li>
+     * <li>X</li>
+     * <li>Y</li>
+     * <li>Z</li>
+     * <li>Max Players</li>
+     * <li>Min Players</li>
+     * <li>Starting Time</li>
+     * <li>Winning Score</li>
+     * </ul>
+     * <br>
+     * </br>
+     */
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();

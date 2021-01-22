@@ -18,6 +18,9 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 
+/**
+ * Handles the main commands inside of the plugin. {@code /microgames}
+ */
 public class MicrogamesCommand implements CommandExecutor {
 
         // Initalize Globals
@@ -88,6 +91,12 @@ public class MicrogamesCommand implements CommandExecutor {
 
         }
 
+        /**
+         * Command to leave the game.
+         *
+         * @see GameInstance
+         * @param sender
+         */
         public void leaveCommand(CommandSender sender) {
                 Player p = null;
                 if (sender instanceof Player) {
@@ -96,7 +105,7 @@ public class MicrogamesCommand implements CommandExecutor {
                         sender.spigot().sendMessage(Messages.MUST_BE_PLAYER.getMessage());
                         return;
                 }
-                GameInstance instance = GameInstance.getPlayerGame(p.getUniqueId());
+                final GameInstance instance = GameInstance.getPlayerGame(plugin.getGameInstances(), p.getUniqueId());
                 if (instance == null) {
                         p.spigot().sendMessage(Messages.PLAYER_CANT_LEAVE.getMessage());
                         return;
@@ -155,6 +164,11 @@ public class MicrogamesCommand implements CommandExecutor {
                 p.spigot().sendMessage(infoMessage);
         }
 
+        /**
+         * The reload command. Can take a CommandSender.
+         *
+         * @param sender
+         */
         public void reload(CommandSender sender) {
                 if (!sender.hasPermission(Permissions.RELOAD_CONFIG.toString())) {
                         sender.spigot().sendMessage(new TextComponent(Messages.NO_PERMISSION.getMessage()));
@@ -185,27 +199,27 @@ public class MicrogamesCommand implements CommandExecutor {
                         sender.spigot().sendMessage(Messages.MUST_BE_PLAYER.getMessage());
                         return;
                 }
-
+                // If the number of arguments is correct.
                 if (args.length != 2) {
                         sender.spigot().sendMessage(new ComponentBuilder(
                                         "You must include a valid game name. Ex: /microgames setup lobby1")
                                                         .color(ChatColor.RED).create());
                         return;
                 }
-
+                // Between 4-12 characters
                 if (args[1].length() > 12 || args[1].length() < 4) {
                         sender.spigot().sendMessage(new ComponentBuilder(
                                         "The name for the game must be between 12 and 4 characters.")
                                                         .color(ChatColor.RED).create());
                         return;
                 }
-
-                if (GameInstance.getByName(args[1]) != null) {
+                // There is not a game setup with that gameID yet.
+                if (GameInstance.getByName(plugin.getGameInstances(), args[1]) != null) {
                         sender.spigot().sendMessage(new ComponentBuilder("A game with this name already exists.")
                                         .color(ChatColor.RED).create());
                         return;
                 }
-
+                // They have permission to setup a game.
                 if (!p.hasPermission(Permissions.SETUP_SIGN.toString())) {
                         p.spigot().sendMessage(new TextComponent(Messages.NO_PERMISSION.getMessage()));
 

@@ -2,6 +2,7 @@ package git.jluvisi;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -19,8 +20,9 @@ import net.md_5.bungee.api.ChatColor;
 /**
  *
  * <h1>MicroGames</h1> Plugin Note: Microgames is a Spigot plugin for
- * <b>MC-1.16.5</b> which has little minigames in which people on a server can
- * participate in. <br>
+ * <b>SpigotMC-1.16.5</b>
+ * ({@linkplain https://hub.spigotmc.org/javadocs/bukkit/}) which has little
+ * minigames in which people on a server can participate in. <br>
  * </br>
  * <b>Structure:</b> Each player can join a game which is known as a
  * {@link GameInstance}. When a player joins a {@link GameInstance} they are
@@ -85,7 +87,9 @@ public class MicroGames extends JavaPlugin {
      * @see GameInstance
      */
     private final ArrayList<GameInstance> gameList = new ArrayList<GameInstance>();
+    /** Repersents the "config.yml" file. */
     private ConfigManager configYAML;
+    /** Repersents the "signs.yml" file. */
     private ConfigManager signsYAML;
 
     @Override
@@ -106,7 +110,6 @@ public class MicroGames extends JavaPlugin {
         getLogger().info("https://github.com/jluvisi2021/MicroGames");
         getLogger().info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
 
-        GameInstance.hookJavaPlugin(this);
         setupGameInstances();
 
         super.onEnable();
@@ -124,10 +127,27 @@ public class MicroGames extends JavaPlugin {
      * made from commands such as the {@code /microgames begin} but these Game
      * Instances are not perminent and are destroyed upon reset.
      *
+     * @see GameInstance
+     * @see GamePlayer
+     *
      * @return List of {@link GameInstance}
      */
     public ArrayList<GameInstance> getGameInstances() {
         return this.gameList;
+    }
+
+    /**
+     * Returns a deep copy of the {@code gameList}. Any modifications to this list
+     * will not effect the {@code gameList}
+     *
+     * @return copy of {@code getGameInstances()}
+     */
+    public ArrayList<GameInstance> getGameInstanceCopy() {
+        final ArrayList<GameInstance> list = new ArrayList<>();
+        for (GameInstance instance : gameList) {
+            list.add(instance);
+        }
+        return list;
     }
 
     /**
@@ -138,22 +158,28 @@ public class MicroGames extends JavaPlugin {
      * @see ConfigManager
      */
     private void setupGameInstances() {
-        ConfigurationSection minigameSection = signsYAML.getConfig().getConfigurationSection("minigame-signs.gameid");
+        final ConfigurationSection minigameSection = signsYAML.getConfig()
+                .getConfigurationSection("minigame-signs.gameid");
         if (minigameSection == null) {
             return;
         }
+        /**
+         * Note: We do not need to check if the World is null because the game will be
+         * destroyed by onDisable() if location is null.
+         */
+        final String gameIDNode = "minigame-signs.gameid.";
         for (String key : minigameSection.getKeys(false)) {
-            Location instanceLocation = new Location(
-                    getServer().getWorld(signsYAML.getString("minigame-signs.gameid." + key + ".location.world")),
-                    Double.parseDouble(signsYAML.getString("minigame-signs.gameid." + key + ".location.x")),
-                    Double.parseDouble(signsYAML.getString("minigame-signs.gameid." + key + ".location.y")),
-                    Double.parseDouble(signsYAML.getString("minigame-signs.gameid." + key + ".location.z")));
-            int minPlayers = Integer.parseInt(signsYAML.getString("minigame-signs.gameid." + key + ".minimum-players"));
-            int maxPlayers = Integer.parseInt(signsYAML.getString("minigame-signs.gameid." + key + ".maximum-players"));
-            int startingTime = Integer.parseInt(signsYAML.getString("minigame-signs.gameid." + key + ".starting-time"));
-            int winningScore = Integer.parseInt(signsYAML.getString("minigame-signs.gameid." + key + ".winning-score"));
-            GameInstance gameInstance = new GameInstance(key, instanceLocation, minPlayers, maxPlayers, startingTime,
-                    winningScore);
+            final Location instanceLocation = new Location(
+                    getServer().getWorld(signsYAML.getString(gameIDNode + key + ".location.world")),
+                    Double.parseDouble(signsYAML.getString(gameIDNode + key + ".location.x")),
+                    Double.parseDouble(signsYAML.getString(gameIDNode + key + ".location.y")),
+                    Double.parseDouble(signsYAML.getString(gameIDNode + key + ".location.z")));
+            final int minPlayers = Integer.parseInt(signsYAML.getString(gameIDNode + key + ".minimum-players"));
+            final int maxPlayers = Integer.parseInt(signsYAML.getString(gameIDNode + key + ".maximum-players"));
+            final int startingTime = Integer.parseInt(signsYAML.getString(gameIDNode + key + ".starting-time"));
+            final int winningScore = Integer.parseInt(signsYAML.getString(gameIDNode + key + ".winning-score"));
+            final GameInstance gameInstance = new GameInstance(key, instanceLocation, minPlayers, maxPlayers,
+                    startingTime, winningScore);
             // Reset the text of the sign in case of server crash.
             GameInstance.updateSign(gameInstance);
             gameList.add(gameInstance);
@@ -221,10 +247,11 @@ public class MicroGames extends JavaPlugin {
         getLogger().info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
 
         // Delete the entire signsYAML file to replace it with everything in the list.
+        final String gameIDNode = "minigame-signs.gameid.";
         try {
             signsYAML.setValue("minigame-signs.gameid", null);
         } catch (IOException e1) {
-            // TODO Auto-generated catch block
+            getLogger().severe("Could not access \"signs.yml\" or \"signs.yml\" is missing or corrupted.");
             e1.printStackTrace();
         }
         // Check to see if any new game instances have been made since last restart.
@@ -235,33 +262,25 @@ public class MicroGames extends JavaPlugin {
             // Reset the text of the sign in case of a server crash.
             GameInstance.updateSign(gameInstance);
             // write all the game instances to config.
-            if (signsYAML.getConfig()
-                    .get("minigame-signs.gameid." + gameInstance.getGameInstanceID().toString()) == null) {
+
+            if (signsYAML.getConfig().get(gameIDNode + gameInstance.getGameInstanceID().toString()) == null) {
                 try {
-                    signsYAML.setValue("minigame-signs.gameid." + gameInstance.getGameInstanceID().toString(), true);
-                    signsYAML.setValue(
-                            "minigame-signs.gameid." + gameInstance.getGameInstanceID().toString() + ".location.world",
+                    signsYAML.setValue(gameIDNode + gameInstance.getGameInstanceID().toString(), true);
+                    signsYAML.setValue(gameIDNode + gameInstance.getGameInstanceID().toString() + ".location.world",
                             gameInstance.getSignLocation().getWorld().getName());
-                    signsYAML.setValue(
-                            "minigame-signs.gameid." + gameInstance.getGameInstanceID().toString() + ".location.x",
+                    signsYAML.setValue(gameIDNode + gameInstance.getGameInstanceID().toString() + ".location.x",
                             gameInstance.getSignLocation().getX());
-                    signsYAML.setValue(
-                            "minigame-signs.gameid." + gameInstance.getGameInstanceID().toString() + ".location.y",
+                    signsYAML.setValue(gameIDNode + gameInstance.getGameInstanceID().toString() + ".location.y",
                             gameInstance.getSignLocation().getY());
-                    signsYAML.setValue(
-                            "minigame-signs.gameid." + gameInstance.getGameInstanceID().toString() + ".location.z",
+                    signsYAML.setValue(gameIDNode + gameInstance.getGameInstanceID().toString() + ".location.z",
                             gameInstance.getSignLocation().getZ());
-                    signsYAML.setValue(
-                            "minigame-signs.gameid." + gameInstance.getGameInstanceID().toString() + ".minimum-players",
+                    signsYAML.setValue(gameIDNode + gameInstance.getGameInstanceID().toString() + ".minimum-players",
                             gameInstance.getMinPlayers());
-                    signsYAML.setValue(
-                            "minigame-signs.gameid." + gameInstance.getGameInstanceID().toString() + ".maximum-players",
+                    signsYAML.setValue(gameIDNode + gameInstance.getGameInstanceID().toString() + ".maximum-players",
                             gameInstance.getMaxPlayers());
-                    signsYAML.setValue(
-                            "minigame-signs.gameid." + gameInstance.getGameInstanceID().toString() + ".starting-time",
+                    signsYAML.setValue(gameIDNode + gameInstance.getGameInstanceID().toString() + ".starting-time",
                             gameInstance.getStartingTime());
-                    signsYAML.setValue(
-                            "minigame-signs.gameid." + gameInstance.getGameInstanceID().toString() + ".winning-score",
+                    signsYAML.setValue(gameIDNode + gameInstance.getGameInstanceID().toString() + ".winning-score",
                             gameInstance.getWinningScore());
                     signsYAML.saveConfig();
                 } catch (IOException e) {

@@ -1,3 +1,4 @@
+/** s */
 package git.jluvisi.util;
 
 import java.util.LinkedHashMap;
@@ -31,15 +32,44 @@ import net.md_5.bungee.api.chat.hover.content.Text;
  * </pre>
  */
 public enum Messages {
-
-    MUST_BE_PLAYER("messages.must-be-player"), NO_PERMISSION("messages.no-permission"),
-    GAME_SIGNS_DISABLED("messages.game-signs-disabled"), GAME_SIGNS_LINE1("game-signs.line1-color"),
-    GAME_SIGNS_LINE2("game-signs.line2"), GAME_SIGNS_LINE3("game-signs.line3"), GAME_SIGNS_LINE4("game-signs.line4"),
-    GAME_FULL("messages.game-full"), IN_GAME_ALREADY("messages.already-in-game"),
-    PLAYER_LOBBY_JOIN("messages.player-lobby-join"), GLOBAL_PLAYER_LOBBY_JOIN("messages.global-player-lobby-join"),
-    GAME_STARTING("messages.game-starting"), PLAYERS_NEEDED("messages.players-needed"),
-    MUST_LEAVE_GAME("messages.must-leave-game"), GLOBAL_LEAVE_GAME("messages.global-player-leave"),
-    LEAVE_GAME("messages.leave-game"), PLAYER_CANT_LEAVE("messages.player-cant-leave");
+    /** <strong>Node:</strong> <i>messages.must-be-player </i> */
+    MUST_BE_PLAYER("messages.must-be-player"),
+    /** <strong>Node:</strong> <i>messages.no-permission </i> */
+    NO_PERMISSION("messages.no-permission"),
+    /** <strong>Node:</strong> <i>messages.game-signs.disabled </i> */
+    GAME_SIGNS_DISABLED("messages.game-signs-disabled"),
+    /** <strong>Node:</strong> <i> game-signs.line1-color </i> */
+    GAME_SIGNS_LINE1("game-signs.line1-color"),
+    /** <strong>Node:</strong> <i> game-signs.line2 </i> */
+    GAME_SIGNS_LINE2("game-signs.line2"),
+    /** <strong>Node:</strong> <i> game-signs.line3 </i> */
+    GAME_SIGNS_LINE3("game-signs.line3"),
+    /** <strong>Node:</strong> <i> game-signs.line4 </i> */
+    GAME_SIGNS_LINE4("game-signs.line4"),
+    /** <strong>Node:</strong> <i>messages.game-full </i> */
+    GAME_FULL("messages.game-full"),
+    /** <strong>Node:</strong> <i>messages.already-in-game </i> */
+    IN_GAME_ALREADY("messages.already-in-game"),
+    /** <strong>Node:</strong> <i>messages.player-lobby-join </i> */
+    PLAYER_LOBBY_JOIN("messages.player-lobby-join"),
+    /** <strong>Node:</strong> <i>messages.global-player-lobby-join </i> */
+    GLOBAL_PLAYER_LOBBY_JOIN("messages.global-player-lobby-join"),
+    /** <strong>Node:</strong> <i>messages.game-starting </i> */
+    GAME_STARTING("messages.game-starting"),
+    /** <strong>Node:</strong> <i>messages.players-needed </i> */
+    PLAYERS_NEEDED("messages.players-needed"),
+    /** <strong>Node:</strong> <i>messages.must-leave-game </i> */
+    MUST_LEAVE_GAME("messages.must-leave-game"),
+    /** <strong>Node:</strong> <i>messages.global-player-leave </i> */
+    GLOBAL_LEAVE_GAME("messages.global-player-leave"),
+    /** <strong>Node:</strong> <i>messages.leave-game </i> */
+    LEAVE_GAME("messages.leave-game"),
+    /** <strong>Node:</strong> <i>messages.player-cant-leave </i> */
+    PLAYER_CANT_LEAVE("messages.player-cant-leave"),
+    /** <strong>Node:</strong> <i>game-signs.game-full-color </i> */
+    GAME_SIGNS_GAME_FULL_COLOR("game-signs.game-full-color"),
+    /** <strong>Node:</strong> <i>game-signs.game-full-color-line </i> */
+    GAME_SIGNS_GAME_COLOR_LINE("game-signs.game-full-color-line");
 
     /**
      * We use a static singleton reference here instead of dependency injection
@@ -49,15 +79,32 @@ public enum Messages {
     private static final ConfigManager configYAML = new ConfigManager(JavaPlugin.getPlugin(MicroGames.class),
             "config.yml");
 
-    private String node;
+    /** The actual path to the specific config value from the enum. */
+    private final String node;
 
     Messages(String node) {
         this.node = node;
     }
 
+    /**
+     * Returns the raw node without any config parsing.
+     */
     @Override
     public String toString() {
         return node;
+    }
+
+    /**
+     * Retrieve a specific value inside of the messages enum.
+     *
+     * @param str
+     * @return
+     */
+    public static Messages fromString(String str) {
+        if (Messages.valueOf(str) != null) {
+            return Messages.valueOf(str);
+        }
+        throw new NullPointerException();
     }
 
     /**
@@ -75,7 +122,7 @@ public enum Messages {
      *                     Set the placeholders of this hashmap like so:
      *
      *                     <pre>
-     * 
+     *
      *                     final LinkedHashMap<String, String> placeHolderMap = new LinkedHashMap<String, String>() {
      *                         {
      *                             put("%placeholder%", String.valueOf(configString));
@@ -103,7 +150,7 @@ public enum Messages {
      * {@code BaseComponent[]} can be converted to {@code TextComponents} through
      * the {@code TextComponent(BaseComponent[])} constructor.
      *
-     * @return BaseComponent[]
+     * @return {@code BaseComponent[]}
      */
     public BaseComponent[] getMessage() {
         return TextComponent

@@ -10,11 +10,12 @@
 # Version: 1.0-SNAPSHOT (Unfinished)
 # Author: Interryne/jluvisi2021
 # Github: https://github.com/jluvisi2021/MicroGames
+# JavaDoc: https://jluvisi2021.github.io/MicroGames/
 # If you need to reload your configuration, have lost comments, or have other problems then go to the github "HELP" section in README.md! :D
 
-# DO NOT EDIT #
+####### DO NOT EDIT #######
 major-config-version: "1.0"
-###############
+###########################
 
 # Messages in the plugin.
 messages:

@@ -29,6 +29,7 @@ public class SetupSignEvent implements Listener {
         this.configYAML = new ConfigManager(plugin, "config.yml");
     }
 
+    /** Material of the sign. By default it is OAK. */
     private Material signMaterial = Material.OAK_SIGN;
 
     @EventHandler
@@ -40,10 +41,10 @@ public class SetupSignEvent implements Listener {
         // if they have the metadata and have recently executed the command to setup a
         // sign.
         if (e.getPlayer().hasMetadata("setup-begin")) {
-            String message = e.getMessage();
-            Player p = e.getPlayer();
+            final String message = e.getMessage();
+            final Player p = e.getPlayer();
 
-            String[] args = message.split(" ");
+            final String[] args = message.split(" ");
 
             int numMinPlayers;
             int numMaxPlayers;
@@ -60,10 +61,10 @@ public class SetupSignEvent implements Listener {
                 // They follow the correct criteria
                 if (numMinPlayers < 1 || numMinPlayers > 100 || numMaxPlayers < 2 || numMaxPlayers > 100
                         || winningScore < 1 || winningScore > 99 || gameStartTime < 10 || gameStartTime > 300) {
-                    throw new Exception();
+                    throw new NumberFormatException();
                 }
 
-            } catch (Exception exception) {
+            } catch (final NumberFormatException exception) {
                 p.spigot().sendMessage(new ComponentBuilder().color(ChatColor.RED).append(
                         "One or more of your arguments to identify this game were incorrect. Please repeat the command and try again.")
                         .create());
@@ -79,7 +80,7 @@ public class SetupSignEvent implements Listener {
             }
 
             // Setup the sign with the arguments
-            ItemStack sign = SpigotHelper.compactItem(signMaterial, ChatColor.YELLOW + "Game Sign", 1,
+            final ItemStack sign = SpigotHelper.compactItem(signMaterial, ChatColor.YELLOW + "Game Sign", 1,
                     Arrays.asList(
                             ChatColor.GRAY.toString() + ChatColor.ITALIC.toString() + "Place this sign to activate it.",
                             ChatColor.GOLD + "Game Instance Settings:",

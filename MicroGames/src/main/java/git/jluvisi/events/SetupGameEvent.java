@@ -34,12 +34,12 @@ public class SetupGameEvent implements Listener {
 
         // If they have recently executed the command to make a sign.
         if (e.getPlayer().hasMetadata("place-game-instance")) {
-            Player p = e.getPlayer();
+            final Player p = e.getPlayer();
 
             // We get the individual arguments for the sign from their meta data.
-            String[] args = p.getMetadata("place-game-instance").get(0).asString().split(" ");
+            final String[] args = p.getMetadata("place-game-instance").get(0).asString().split(" ");
             // Make a new game instance out of the arguments.
-            GameInstance gameInstance = new GameInstance(p.getMetadata("setup-game-name").get(0).asString(),
+            final GameInstance gameInstance = new GameInstance(p.getMetadata("setup-game-name").get(0).asString(),
                     e.getBlock().getLocation(), Integer.parseInt(args[0]), Integer.parseInt(args[1]),
                     Integer.parseInt(args[3]), Integer.parseInt(args[2]));
             // Add the game instance to the signleton array

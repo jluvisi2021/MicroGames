@@ -5,16 +5,23 @@ package git.jluvisi.util;
  * which point to the node of the config.
  */
 public enum Permissions {
+    /** <strong>Node:</strong> <i>permissions.reload-config </i> */
+    RELOAD_CONFIG("permissions.reload-config"),
+    /** <strong>Node:</strong> <i>permissions.setup-game-sign </i> */
+    SETUP_SIGN("permissions.setup-game-sign"),
+    /** <strong>Node:</strong> <i>permissions.destroy-game-sign </i> */
+    DESTROY_SIGN("permissions.destroy-game-sign"),
+    /** <strong>Node:</strong> <i>permissions.use-join-sign </i> */
+    JOIN_GAME("permissions.use-join-sign");
 
-    RELOAD_CONFIG("permissions.reload-config"), SETUP_SIGN("permissions.setup-game-sign"),
-    DESTROY_SIGN("permissions.destroy-game-sign"), JOIN_GAME("permissions.use-join-sign");
-
-    private String node;
+    /** Repersents the path in the config relative to the enum. */
+    private final String node;
 
     Permissions(String node) {
         this.node = node;
     }
 
+    /** Returns the raw node of the config without any parsing. */
     @Override
     public String toString() {
         return node;

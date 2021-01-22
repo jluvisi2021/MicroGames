@@ -39,12 +39,15 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.9</version>
+        <version>3.2.0</version>
         <configuration>
           <noqualifier>all</noqualifier>
           <reportOutputDirectory>${basedir}/MyDoc/javadoc</reportOutputDirectory>
           <destDir>javadoc</destDir>
           <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
+          <additionalOptions>
+            <additionalOption>-Xdoclint:none</additionalOption>
+          </additionalOptions>
         </configuration>
         <executions>
           <execution>

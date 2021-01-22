@@ -12,13 +12,35 @@ import git.jluvisi.MicroGames;
 
 /**
  * This class is used to manage different configuration files within the plugin.
- * More Specifically: 'config.yml' and 'signs.yml'.
+ * More Specifically: 'config.yml' and 'signs.yml'. <br>
+ * </br>
+ * The Config File can be accessed through direct-access or indirect-access.
+ * Indirect access is usually reccomended because the methods can be changed
+ * over time to provide for more support while the spigot methods are out of my
+ * control. <br>
+ * </br>
+ * <h3>Indirect Access Methods</h3>
+ * <ul>
+ * <li>{@code saveConfig()}</li>
+ * <li>{@code reloadConfig()}</li>
+ * <li>{@code getString(node)}</li>
+ * <li>{@code getBoolean(node)}</li>
+ * <li>{@code getInt(node)}</li>
+ * <li>{@code getStringList(node)}</li>
+ * <li>{@code getLocation(node)}</li>
+ * <li>{@code getItemStack(node)}</li>
+ * <li>{@code setValue(node, value)}</li>
+ * </ul>
  */
 public class ConfigManager {
 
+    /** Main Class */
     private final MicroGames plugin;
+    /** The config file repersented by a Java {@code File} object. */
     private final File config;
+    /** The actual config file. */
     private YamlConfiguration yamlConfig;
+    /** Name of the file. */
     private final String fileName;
 
     /**
@@ -77,26 +99,62 @@ public class ConfigManager {
     }
 
     /// METHODS TO MANIPULATE CONFIGURATION FILE ///
+
+    /**
+     * Returns the value of the config at a specific node.
+     *
+     * @param node
+     * @return
+     */
     public String getString(String node) {
         return this.yamlConfig.getString(node);
     }
 
+    /**
+     * Returns the value of the config at a specific node.
+     *
+     * @param node
+     * @return
+     */
     public boolean getBoolean(String node) {
         return this.yamlConfig.getBoolean(node);
     }
 
+    /**
+     * Returns the value of the config at a specific node.
+     *
+     * @param node
+     * @return
+     */
     public int getInt(String node) {
         return this.yamlConfig.getInt(node);
     }
 
+    /**
+     * Returns the value of the config at a specific node.
+     *
+     * @param node
+     * @return
+     */
     public List<String> getStringList(String node) {
         return this.yamlConfig.getStringList(node);
     }
 
+    /**
+     * Returns the value of the config at a specific node.
+     *
+     * @param node
+     * @return org.bukkit.Location
+     */
     public Location getLocation(String node) {
         return this.yamlConfig.getLocation(node);
     }
 
+    /**
+     * Returns the value of the config at a specific node.
+     *
+     * @return org.bukkit.inventory.ItemStack
+     */
     public ItemStack getItemStack(String node) {
         return this.yamlConfig.getItemStack(node);
     }

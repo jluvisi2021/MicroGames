@@ -20,6 +20,10 @@ public class SpigotHelper {
     /**
      * Returns if a material as a string is null
      *
+     * <pre>
+     * return Material.getMaterial(s) != null;
+     * </pre>
+     *
      * @param s
      * @return
      */
