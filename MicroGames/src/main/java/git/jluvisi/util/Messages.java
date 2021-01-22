@@ -38,7 +38,8 @@ public enum Messages {
     GAME_FULL("messages.game-full"), IN_GAME_ALREADY("messages.already-in-game"),
     PLAYER_LOBBY_JOIN("messages.player-lobby-join"), GLOBAL_PLAYER_LOBBY_JOIN("messages.global-player-lobby-join"),
     GAME_STARTING("messages.game-starting"), PLAYERS_NEEDED("messages.players-needed"),
-    MUST_LEAVE_GAME("messages.must-leave-game");
+    MUST_LEAVE_GAME("messages.must-leave-game"), GLOBAL_LEAVE_GAME("messages.global-player-leave"),
+    LEAVE_GAME("messages.leave-game"), PLAYER_CANT_LEAVE("messages.player-cant-leave");
 
     /**
      * We use a static singleton reference here instead of dependency injection
@@ -74,17 +75,17 @@ public enum Messages {
      *                     Set the placeholders of this hashmap like so:
      *
      *                     <pre>
-     {@code
-    
-          final LinkedHashMap<String, String> placeHolderMap = new LinkedHashMap<String, String>() {
-    {
-        put("%placeholder%", String.valueOf(configString));
-    
-    }
-      };
+     * 
+     *                     final LinkedHashMap<String, String> placeHolderMap = new LinkedHashMap<String, String>() {
+     *                         {
+     *                             put("%placeholder%", String.valueOf(configString));
+     *
+     *                         }
+     *                     };
+     *
      *                     </pre>
      *
-     *                     @return replaced string
+     * @return replaced string
      */
     public static String replacePlaceholder(String value, LinkedHashMap<String, String> replaceValue) {
         for (Map.Entry<String, String> entry : replaceValue.entrySet()) {

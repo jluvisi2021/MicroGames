@@ -30,6 +30,9 @@ messages:
   global-player-lobby-join: "&a%player% &7has joined the lobby! &8(&e%players_in_lobby%&7/&6%max_players_allowed%&8)&7."
   game-starting: "&7Game Starting in: &a%time_left% seconds!"
   players-needed: "&6%players_needed% players &7needed to start the game!"
+  player-cant-leave: "&cYou cannot leave a game because you are not in one."
+  global-player-leave: "&a%player% &7has left the lobby! &8(&e%players_in_lobby%&7/&6%max_players_allowed%&8)&7."
+  leave-game: "&cYou left the game!"
 
 # Permissions
 permissions:

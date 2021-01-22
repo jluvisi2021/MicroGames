@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"git.jluvisi"},{"l":"git.jluvisi.cmds"},{"l":"git.jluvisi.events"},{"l":"git.jluvisi.minigames"},{"l":"git.jluvisi.util"}];updateSearchResults();

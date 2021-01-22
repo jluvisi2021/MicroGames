@@ -3,6 +3,7 @@ package git.jluvisi.minigames;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.UUID;
+
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
 import org.bukkit.event.block.SignChangeEvent;
@@ -149,30 +150,15 @@ public class GameInstance {
         boolean gameStarting = playersNeeded <= 0;
 
         // Replace placeholders.
-        final LinkedHashMap<String, String> placeHolderMap = new LinkedHashMap<String, String>() {
-
-            private static final long serialVersionUID = -1719688454610734917L;
-
-            {
-                put("%player%", gp.getPlayer().getDisplayName());
-                put("%time_left%", String.valueOf(getRemaningTime()));
-                put("%players_needed%", String.valueOf(playersNeeded));
-                put("%players_in_lobby%", String.valueOf(getPlayers().size()));
-                put("%max_players_allowed%", String.valueOf(getMaxPlayers()));
-                put("%game_name%", String.valueOf(plugin.getGameInstances()
-                        .get(plugin.getGameInstances().indexOf(instance)).getGameInstanceID()));
-
-            }
-        };
 
         String playerLobbyJoinMessage = Messages.replacePlaceholder(Messages.PLAYER_LOBBY_JOIN.getLegacyMessage(),
-                placeHolderMap);
+                getPlaceholders(gp));
         String globalPlayerJoinMessage = Messages
-                .replacePlaceholder(Messages.GLOBAL_PLAYER_LOBBY_JOIN.getLegacyMessage(), placeHolderMap);
+                .replacePlaceholder(Messages.GLOBAL_PLAYER_LOBBY_JOIN.getLegacyMessage(), getPlaceholders(gp));
         String gameStartingMessage = Messages.replacePlaceholder(Messages.GAME_STARTING.getLegacyMessage(),
-                placeHolderMap);
+                getPlaceholders(gp));
         String playersNeededMessage = Messages.replacePlaceholder(Messages.PLAYERS_NEEDED.getLegacyMessage(),
-                placeHolderMap);
+                getPlaceholders(gp));
 
         // Send the messages from config.
         gp.getPlayer().sendMessage(playerLobbyJoinMessage);
@@ -198,13 +184,47 @@ public class GameInstance {
      */
     public void removePlayer(GamePlayer p) {
         this.players.remove(p);
+        for (GamePlayer player : players) {
+            player.getPlayer().sendMessage(
+                    Messages.replacePlaceholder(Messages.GLOBAL_LEAVE_GAME.getLegacyMessage(), getPlaceholders(p)));
+        }
+        p.getPlayer()
+                .sendMessage(Messages.replacePlaceholder(Messages.LEAVE_GAME.getLegacyMessage(), getPlaceholders(p)));
         updateSign(this);
+    }
+
+    /**
+     * Has all of the placeholders for the {@code replacePlaceholder} method.
+     *
+     * @see Messages
+     * @param gp
+     * @return
+     */
+    private final LinkedHashMap<String, String> getPlaceholders(GamePlayer gp) {
+        final LinkedHashMap<String, String> placeHolderMap = new LinkedHashMap<String, String>() {
+
+            private static final long serialVersionUID = -1719688454610734917L;
+
+            {
+                put("%player%", gp.getPlayer().getDisplayName());
+                put("%time_left%", String.valueOf(getRemaningTime()));
+                put("%players_needed%", String.valueOf((getMinPlayers() - getPlayers().size())));
+                put("%players_in_lobby%", String.valueOf(getPlayers().size()));
+                put("%max_players_allowed%", String.valueOf(getMaxPlayers()));
+                put("%game_name%", String.valueOf(plugin.getGameInstances()
+                        .get(plugin.getGameInstances().indexOf(instance)).getGameInstanceID()));
+
+            }
+        };
+        return placeHolderMap;
     }
 
     /**
      * Goes through all of the game instances on the server and returns a game
      * instance that has the name specified. If no game instance is found the method
      * returns null.
+     *
+     * @apiNote O(n)
      *
      * @param name
      * @return
@@ -216,6 +236,47 @@ public class GameInstance {
                 return plugin.getGameInstances().get(i);
             }
         }
+        return null;
+    }
+
+    /**
+     * Goes through every game instance on the server and finds the game instance a
+     * specific player is in.
+     *
+     * Returns null if no player is found.
+     * 
+     * @apiNote O(n^2)
+     *
+     * @param UUID
+     * @return
+     */
+    public static GameInstance getPlayerGame(UUID UUID) {
+        for (GameInstance instance : plugin.getGameInstances()) {
+            for (GamePlayer player : instance.getPlayers()) {
+                if (player.getPlayerUUID() == UUID) {
+                    return instance;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Goes through every game instance on the server and finds the GamePlayer
+     * specified. Returns null if no player is found.
+     *
+     * @apiNote O(n)
+     *
+     * @param UUID
+     * @return
+     */
+    public static GamePlayer getPlayer(GameInstance instance, UUID uuid) {
+        for (GamePlayer player : instance.getPlayers()) {
+            if (player.getPlayerUUID().equals(uuid)) {
+                return player;
+            }
+        }
+
         return null;
     }
 

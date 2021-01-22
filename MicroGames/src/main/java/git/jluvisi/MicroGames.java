@@ -18,11 +18,11 @@ import net.md_5.bungee.api.ChatColor;
 
 /**
  *
- * <h1>MicroGames</h1> Plugin Note: Microgames is a Spigot plugin for 1.16.5
- * which has little minigames in which people on a server can participate in.
- * <br>
+ * <h1>MicroGames</h1> Plugin Note: Microgames is a Spigot plugin for
+ * <b>MC-1.16.5</b> which has little minigames in which people on a server can
+ * participate in. <br>
  * </br>
- * Structure: Each player can join a game which is known as a
+ * <b>Structure:</b> Each player can join a game which is known as a
  * {@link GameInstance}. When a player joins a {@link GameInstance} they are
  * transformed into a {@link GamePlayer}. {@link GamePlayer}s are Players but
  * with more attributes to make it easier to handle progressing through
@@ -48,7 +48,22 @@ import net.md_5.bungee.api.ChatColor;
  *
  * </pre>
  *
- * <a href="https://github.com/jluvisi2021/MicroGames/">All of this code is on my personal GitHub.</a>
+ * {@link GameInstance}'s can be repersented in both <i>Volatile</i> and
+ * <i>Non-Volatile</i> states depending on the situation. One example of a
+ * Non-Volatile {@link GameInstance} is when it is repersented through a
+ * <i>Sign</i>. When a game sign is created it is stored as a
+ * {@link GameInstance} but when the server is reset the {@code onDisable()}
+ * method stores every game sign in memory inside of the {@code signs.yml}
+ * configuration file. An example of a Volatile {@link GameInstance} is one
+ * which is created through the {@code /microgames begin} command. This is a
+ * temporary {@link GameInstance} that players can join through the join command
+ * and play normally. However when the server is restarted this Volatile
+ * {@link GameInstance} is wiped from memory.
+ *
+ * <br>
+ * </br>
+ * <a href="https://github.com/jluvisi2021/MicroGames/">All of this code is on
+ * my personal GitHub.</a>
  *
  * @author Interryne/jluvisi2021
  * @version 1.0-SNAPSHOT
@@ -97,6 +112,20 @@ public class MicroGames extends JavaPlugin {
         super.onEnable();
     }
 
+    /**
+     * Retrieve the {@link GameInstance}'s that are currently being held by the
+     * plugin. <br>
+     * </br>
+     * <strong><i>What is a {@link GameInstance}?</i></strong> <br>
+     * </br>
+     * Game instances are entire games that are being run or can be run that are
+     * currently present on the server. Game instances which are saved as signs are
+     * saved upon restart and are physically in the game. Game Instances can also be
+     * made from commands such as the {@code /microgames begin} but these Game
+     * Instances are not perminent and are destroyed upon reset.
+     *
+     * @return List of {@link GameInstance}
+     */
     public ArrayList<GameInstance> getGameInstances() {
         return this.gameList;
     }

@@ -62,6 +62,8 @@ public class MicrogamesCommand implements CommandExecutor {
 
                                         // Command Example: /microgames leave
                                         // Leave the current game.
+                                        leaveCommand(sender);
+                                        return true;
 
                                 } else if (args[0].equalsIgnoreCase("stop")) {
 
@@ -84,6 +86,22 @@ public class MicrogamesCommand implements CommandExecutor {
                 }
                 return false;
 
+        }
+
+        public void leaveCommand(CommandSender sender) {
+                Player p = null;
+                if (sender instanceof Player) {
+                        p = (Player) sender;
+                } else {
+                        sender.spigot().sendMessage(Messages.MUST_BE_PLAYER.getMessage());
+                        return;
+                }
+                GameInstance instance = GameInstance.getPlayerGame(p.getUniqueId());
+                if (instance == null) {
+                        p.spigot().sendMessage(Messages.PLAYER_CANT_LEAVE.getMessage());
+                        return;
+                }
+                instance.removePlayer(GameInstance.getPlayer(instance, p.getUniqueId()));
         }
 
         /**
