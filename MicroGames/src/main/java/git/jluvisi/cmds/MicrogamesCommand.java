@@ -1,5 +1,7 @@
 package git.jluvisi.cmds;
 
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -8,6 +10,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 import git.jluvisi.MicroGames;
 import git.jluvisi.minigames.GameInstance;
+import git.jluvisi.minigames.GamePlayer;
 import git.jluvisi.util.ConfigManager;
 import git.jluvisi.util.Messages;
 import git.jluvisi.util.Permissions;
@@ -19,7 +22,8 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 
 /**
- * Handles the main commands inside of the plugin. {@code /microgames}
+ * Handles the main commands inside of the plugin. {@code /microgames} TODO:
+ * /microgames invite
  */
 public class MicrogamesCommand implements CommandExecutor {
 
@@ -45,26 +49,55 @@ public class MicrogamesCommand implements CommandExecutor {
                         } else {
                                 // Reload Config Command
                                 if (args[0].equalsIgnoreCase("reload")) {
+                                        if (!sender.hasPermission(Permissions.RELOAD_CONFIG.toString())) {
+                                                sender.spigot().sendMessage(Messages.NO_PERMISSION.getMessage());
+                                                return true;
+                                        }
                                         reload(sender);
                                         return true;
                                 } else if (args[0].equalsIgnoreCase("setup")) {
+                                        if (!sender.hasPermission(Permissions.SETUP_SIGN.toString())) {
+                                                sender.spigot().sendMessage(Messages.NO_PERMISSION.getMessage());
+                                                return true;
+                                        }
                                         setupCommand(sender, args);
                                         return true;
                                 } else if (args[0].equalsIgnoreCase("begin")) {
 
-                                        // Command Example: /microgames begin <num players> <max players> <winning
-                                        // score> <start time>
+                                        // Command Example: /microgames begin <name> <num players> <max players>
+                                        // <winning
+                                        // score> <start time> <announce>
                                         // Creates a static one time game where players can join.
 
-                                } else if (args[0].equalsIgnoreCase("join")) {
+                                        if (!sender.hasPermission(Permissions.BEGIN_GAME.toString())) {
+                                                sender.spigot().sendMessage(Messages.NO_PERMISSION.getMessage());
+                                                return true;
+                                        }
 
+                                        beginCommand(sender, args);
+
+                                        return true;
+                                } else if (args[0].equalsIgnoreCase("join")) {
                                         // Command Example: /microgames join <lobby num>
                                         // Join a static game or a sign game with a command.
 
-                                } else if (args[0].equalsIgnoreCase("leave")) {
+                                        if (!sender.hasPermission(Permissions.JOIN_GAME.toString())) {
+                                                sender.spigot().sendMessage(Messages.NO_PERMISSION.getMessage());
+                                                return true;
+                                        }
+
+                                        joinCommand(sender, args);
+
+                                        return true;
+
+                                } else if (args[0].equalsIgnoreCase("leave") || args[0].equalsIgnoreCase("quit")) {
 
                                         // Command Example: /microgames leave
                                         // Leave the current game.
+                                        if (!sender.hasPermission(Permissions.LEAVE_GAME.toString())) {
+                                                sender.spigot().sendMessage(Messages.NO_PERMISSION.getMessage());
+                                                return true;
+                                        }
                                         leaveCommand(sender);
                                         return true;
 
@@ -78,6 +111,12 @@ public class MicrogamesCommand implements CommandExecutor {
                                         // Command Example: /microgames forcejoin <player> <lobbyid>
                                         // Force a player to join a game.
 
+                                } else if (args[0].equalsIgnoreCase("joinset")) {
+                                        // Command Example: /microgames joinset <player> <lobbyid> [game params]
+                                        // Forces a player to join a game and if that game does not exist a non volatile
+                                        // game is created with that name and params. Useful for things like CustomNPCs
+                                        // and stuff.
+
                                 }
                         }
 
@@ -89,6 +128,154 @@ public class MicrogamesCommand implements CommandExecutor {
                 }
                 return false;
 
+        }
+
+        /**
+         * Begin a Volatile game instance.
+         *
+         * @param sender
+         */
+        public void beginCommand(CommandSender sender, String[] args) {
+                if (args.length != 7) {
+                        sender.sendMessage(ChatColor.RED
+                                        + "Incorrect Syntax. Use: /microgames begin <name> <num players> <max players> <winning score> <start time> <announce(true/false)>");
+                        return;
+                }
+
+                // Setup parameters.
+                String gameName; // arg 1
+                int numMinPlayers;
+                int numMaxPlayers;
+                int winningScore;
+                int startingTime;
+                boolean announce;
+
+                try {
+                        gameName = args[1];
+                        numMinPlayers = Integer.parseInt(args[2]);
+                        numMaxPlayers = Integer.parseInt(args[3]);
+                        winningScore = Integer.parseInt(args[4]);
+                        startingTime = Integer.parseInt(args[5]);
+                        announce = Boolean.parseBoolean(args[6]);
+                        // Throw an exception if ANY of the criteria do not match.
+                        if (!(GameInstance.gameIDRange.contains(gameName.length())
+                                        && GameInstance.minPlayersRange.contains(numMinPlayers)
+                                        && GameInstance.maxPlayersRange.contains(numMaxPlayers)
+                                        && GameInstance.winningScoreRange.contains(winningScore)
+                                        && GameInstance.startingTimeRange.contains(startingTime))) {
+                                throw new Exception();
+                        }
+
+                } catch (Exception e) { // Catch any exception while attempting to parse all of these values.
+                        sender.spigot().sendMessage(new ComponentBuilder().color(ChatColor.RED).append(
+                                        "One or more of your arguments to identify this game were incorrect. Please repeat the command and try again.")
+                                        .create());
+                        return;
+                }
+                // There is not a game setup with that gameID yet.
+                if (GameInstance.getByName(plugin.getGameInstances(), gameName) != null) {
+                        sender.spigot().sendMessage(new ComponentBuilder("A game with this name already exists.")
+                                        .color(ChatColor.RED).create());
+                        return;
+                }
+                // They have permission to setup a game.
+                if (!sender.hasPermission(Permissions.BEGIN_GAME.toString())) {
+                        sender.spigot().sendMessage(new TextComponent(Messages.NO_PERMISSION.getMessage()));
+                        return;
+                }
+                final GameInstance instance = new GameInstance(gameName, null, numMinPlayers, numMaxPlayers,
+                                startingTime, winningScore);
+                plugin.getGameInstances().add(instance);
+                // If the player has announcements on.
+                if (announce) {
+                        // Make a holder variable.
+                        Player player = null;
+                        // Get the message from config. We do this so we only need to use the
+                        // replacePlaceholder method once.
+                        final String message = Messages.replacePlaceholder(
+                                        Messages.GAME_CREATED_NOTIFICATION.getLegacyMessage(),
+                                        Messages.getPlaceholders(player, instance, StringUtils.EMPTY));
+                        // Go through every player.
+                        for (Player p : Bukkit.getOnlinePlayers()) {
+                                // If they can recieve notification
+                                if (!p.hasPermission(Permissions.NOTIFY.toString())) {
+                                        continue;
+                                }
+                                // Set the holder variable to p.
+                                player = p;
+                                // Send them a message.
+                                p.sendMessage(message);
+                        }
+                }
+                // if they are a player executor we can add more placeholders.
+                if (sender instanceof Player) {
+                        sender.sendMessage(Messages.replacePlaceholder(Messages.GAME_CREATED_1.getLegacyMessage(),
+                                        Messages.getPlaceholders((Player) sender, instance, StringUtils.EMPTY)));
+                        sender.sendMessage(Messages.replacePlaceholder(Messages.GAME_CREATED_2.getLegacyMessage(),
+                                        Messages.getPlaceholders((Player) sender, instance, StringUtils.EMPTY)));
+                        return;
+                }
+                sender.sendMessage(Messages.replacePlaceholder(Messages.GAME_CREATED_1.getLegacyMessage(),
+                                Messages.getPlaceholders(null, instance, StringUtils.EMPTY)));
+                sender.sendMessage(Messages.replacePlaceholder(Messages.GAME_CREATED_2.getLegacyMessage(),
+                                Messages.getPlaceholders(null, instance, StringUtils.EMPTY)));
+
+        }
+
+        /**
+         * Command to join a game that is IN_LOBBY. Requires player.
+         *
+         * @see GameInstance
+         * @param sender
+         */
+        public void joinCommand(CommandSender sender, String args[]) {
+                Player p = null;
+                if (sender instanceof Player) {
+                        p = (Player) sender;
+                } else {
+                        sender.spigot().sendMessage(Messages.MUST_BE_PLAYER.getMessage());
+                        return;
+                }
+                // microgames join <game name>
+                if (args.length != 2) {
+                        sender.sendMessage(ChatColor.RED + "Incorrect Syntax. Use: /microgames join <game name>");
+                        return;
+                }
+
+                GameInstance instance = GameInstance.getByName(plugin.getGameInstances(), args[1]);
+                if (instance == null) {
+                        // We can use the wrong argument placeholder to send them a message.
+                        sender.sendMessage(Messages.replacePlaceholder(Messages.GAME_CREATED_1.getLegacyMessage(),
+                                        Messages.getPlaceholders(p, null, args[1])));
+                        return;
+                }
+                // if the instance can be joined.
+                if (instance.getPlayers().size() >= instance.getMaxPlayers()) {
+                        p.spigot().sendMessage(new TextComponent(Messages.GAME_FULL.getMessage()));
+                        return;
+                }
+                // The player has the permission.
+                if (!p.hasPermission(Permissions.JOIN_GAME.toString())) {
+                        p.spigot().sendMessage(new TextComponent(Messages.NO_PERMISSION.getMessage()));
+                        return;
+                }
+
+                // Check if the player is already in a game.
+                if (instance.containsPlayer(p.getUniqueId())) {
+                        p.spigot().sendMessage(new TextComponent(Messages.IN_GAME_ALREADY.getMessage()));
+                        return;
+                }
+
+                // Check if a player is trying to join a different game.
+                for (GameInstance game : plugin.getGameInstances()) {
+                        if (game.containsPlayer(p.getUniqueId()) && game != instance) {
+                                p.spigot().sendMessage(new TextComponent(Messages.MUST_LEAVE_GAME.getMessage()));
+                                return;
+                        }
+                }
+                // Add the player to the game instance.
+                plugin.getGameInstances().get(plugin.getGameInstances().indexOf(instance))
+                                .addPlayer(new GamePlayer(p.getUniqueId(), 0));
         }
 
         /**
@@ -222,12 +409,12 @@ public class MicrogamesCommand implements CommandExecutor {
                 // They have permission to setup a game.
                 if (!p.hasPermission(Permissions.SETUP_SIGN.toString())) {
                         p.spigot().sendMessage(new TextComponent(Messages.NO_PERMISSION.getMessage()));
-
+                        return;
                 }
                 // If game signs are disabled.
                 if (!configYAML.getBoolean("game-signs.enabled")) {
                         p.spigot().sendMessage(new TextComponent(Messages.GAME_SIGNS_DISABLED.getMessage()));
-
+                        return;
                 }
                 // Setup the metadata for the player so we know when they enter
                 // arguments in chat.

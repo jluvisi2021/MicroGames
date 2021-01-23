@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import git.jluvisi.MicroGames;
+import git.jluvisi.minigames.GameInstance;
 import git.jluvisi.util.ConfigManager;
 import git.jluvisi.util.SpigotHelper;
 import net.md_5.bungee.api.ChatColor;
@@ -59,8 +60,10 @@ public class SetupSignEvent implements Listener {
                 gameStartTime = Integer.parseInt(args[3]);
 
                 // They follow the correct criteria
-                if (numMinPlayers < 1 || numMinPlayers > 100 || numMaxPlayers < 2 || numMaxPlayers > 100
-                        || winningScore < 1 || winningScore > 99 || gameStartTime < 10 || gameStartTime > 300) {
+                if (!(GameInstance.minPlayersRange.contains(numMinPlayers)
+                        && GameInstance.maxPlayersRange.contains(numMaxPlayers)
+                        && GameInstance.winningScoreRange.contains(winningScore)
+                        && GameInstance.startingTimeRange.contains(gameStartTime))) {
                     throw new NumberFormatException();
                 }
 

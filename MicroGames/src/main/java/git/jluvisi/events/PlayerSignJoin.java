@@ -94,7 +94,7 @@ public class PlayerSignJoin implements Listener {
             return;
         }
         // The player has the permission.
-        if (!p.hasPermission(Permissions.JOIN_GAME.toString())) {
+        if (!p.hasPermission(Permissions.JOIN_GAME_SIGN.toString())) {
             p.spigot().sendMessage(new TextComponent(Messages.NO_PERMISSION.getMessage()));
             return;
         }

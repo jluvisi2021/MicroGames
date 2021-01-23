@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
 import org.bukkit.event.block.SignChangeEvent;
@@ -12,15 +13,28 @@ import git.jluvisi.MicroGames;
 import git.jluvisi.events.SetupSignEvent;
 import git.jluvisi.util.ConfigManager;
 import git.jluvisi.util.Messages;
+import git.jluvisi.util.Range;
 import net.md_5.bungee.api.ChatColor;
 
 /**
  * Repersents a GameInstance object which can be run on the server.
  */
 public class GameInstance {
+
+    /** Range allowed for minimum players. */
+    public static final Range minPlayersRange = new Range(1, 100);
+    /** Range allowed for maximum players. */
+    public static final Range maxPlayersRange = new Range(2, 100);
+    /** Range allowed for defining a winning score. */
+    public static final Range winningScoreRange = new Range(1, 99);
+    /** Range allowed for the starting time. */
+    public static final Range startingTimeRange = new Range(10, 300);
+    /** Range allowed for the length of the game name. */
+    public static final Range gameIDRange = new Range(4, 12);
+
     private Location signLocation;
     private ArrayList<GamePlayer> players;
-    private boolean isActive;
+    private GameState gameState;
     private int maxPlayers;
     private int minPlayers;
     private int startingTime;
@@ -49,7 +63,7 @@ public class GameInstance {
         this.winningScore = winningScore;
         this.minPlayers = minPlayers;
         this.players = new ArrayList<GamePlayer>();
-        this.isActive = false;
+        this.gameState = GameState.IN_LOBBY;
         this.gameID = gameID;
         this.remaningTime = startingTime;
     }
@@ -116,24 +130,73 @@ public class GameInstance {
     }
 
     /**
-     * Returns whether or not the game is currently active and minigames have
-     * started. A game being inside of a lobby waiting for players or the
-     * {@code getRemaningTime()} > 0 repersents that the game has not officially
-     * started yet.
+     * Returns the current state of the game. <br>
      *
-     * @return if the game is running
+     *
+     * </br>
+     * <strong>Game States:</strong>
+     * <table style="width:100%">
+     * <tr>
+     * <th>Game State</th>
+     * <th>Can Join</th>
+     * <th>Is Running</th>
+     * </tr>
+     * <tr>
+     * <td>IN_LOBBY</td>
+     * <td>Yes</td>
+     * <td>No</td>
+     * </tr>
+     * <tr>
+     * <td>IN_PROGRESS</td>
+     * <td>No</td>
+     * <td>Yes</td>
+     * </tr>
+     * <td>DISABLED</td>
+     * <td>No</td>
+     * <td>No</td>
+     * <tr>
+     * </tr>
+     * </table>
+     *
+     * @return
      */
-    public boolean isActive() {
-        return isActive;
+    public GameState getGameState() {
+        return this.gameState;
     }
 
     /**
-     * Sets the game active. This will trigger the starting of the minigames.
+     * Set the current game state of the game. <br>
      *
-     * @param b
+     *
+     * </br>
+     * <strong>Game States:</strong>
+     * <table style="width:100%">
+     * <tr>
+     * <th>Game State</th>
+     * <th>Can Join</th>
+     * <th>Is Running</th>
+     * </tr>
+     * <tr>
+     * <td>IN_LOBBY</td>
+     * <td>Yes</td>
+     * <td>No</td>
+     * </tr>
+     * <tr>
+     * <td>IN_PROGRESS</td>
+     * <td>No</td>
+     * <td>Yes</td>
+     * </tr>
+     * <td>DISABLED</td>
+     * <td>No</td>
+     * <td>No</td>
+     * <tr>
+     * </tr>
+     * </table>
+     *
+     * @return
      */
-    public void setActive(boolean b) {
-        this.isActive = b;
+    public void setGameState(GameState state) {
+        this.gameState = state;
     }
 
     /**
@@ -197,6 +260,12 @@ public class GameInstance {
      * @param gp
      */
     public void addPlayer(GamePlayer gp) {
+        if (gameState != GameState.IN_LOBBY) {
+            final String message = Messages.replacePlaceholder(Messages.GAME_IN_PROGRESS.getLegacyMessage(),
+                    Messages.getPlaceholders(gp.getPlayer(), this, StringUtils.EMPTY));
+            gp.getPlayer().sendMessage(message);
+            return;
+        }
         this.players.add(gp);
 
         // Send the messages from config.
@@ -304,6 +373,7 @@ public class GameInstance {
                 return list.get(i);
             }
         }
+
         return null;
     }
 
@@ -406,7 +476,7 @@ public class GameInstance {
                 put("%max_players%", String.valueOf(instance.getMaxPlayers()));
                 put("%winning_score%", String.valueOf(instance.getWinningScore()));
                 put("%min_players%", String.valueOf(instance.getMinPlayers()));
-                put("%is_active%", String.valueOf(instance.isActive()));
+                put("%game_state%", String.valueOf(instance.getGameState().name()));
 
             }
         };
@@ -433,7 +503,7 @@ public class GameInstance {
      */
     @Override
     public String toString() {
-        StringBuilder str = new StringBuilder();
+        final StringBuilder str = new StringBuilder();
         str.append("NAME: ").append(getGameInstanceID()).append("\n");
         str.append("WORLD: ").append(getSignLocation().getWorld().getName()).append("\n");
         str.append("X: ").append(getSignLocation().getX()).append("\n");

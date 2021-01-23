@@ -12,7 +12,15 @@ public enum Permissions {
     /** <strong>Node:</strong> <i>permissions.destroy-game-sign </i> */
     DESTROY_SIGN("permissions.destroy-game-sign"),
     /** <strong>Node:</strong> <i>permissions.use-join-sign </i> */
-    JOIN_GAME("permissions.use-join-sign");
+    JOIN_GAME_SIGN("permissions.use-join-sign"),
+    /** <strong>Node:</strong> <i>permissions.join-game </i> */
+    JOIN_GAME("permissions.join-game"),
+    /** <strong>Node:</strong> <i>permissions.leave-game </i> */
+    LEAVE_GAME("permissions.leave-game"),
+    /** <strong>Node:</strong> <i>permissions.leave-game </i> */
+    BEGIN_GAME("permissions.start-game"),
+    /** <strong>Node:</strong> <i>notify-announce-game-start </i> */
+    NOTIFY("permissions.notify-announce-game-start");
 
     /** Repersents the path in the config relative to the enum. */
     private final String node;
